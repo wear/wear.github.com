@@ -9,7 +9,7 @@
   <meta name="author" content="KongLingLiang">
 
   
-  <meta name="description" content="CoreText第二季：文本样式与图片实现 上文已经提到，我们可以通过设置NSAttributedString的属性来控制文本的样式，但是这有一个问题，如果是一大段文字，你要对里面的许多文字设置样式，那工作量就太大了，所以我们需要一个样式过滤器，下面我们来创建一个简单的样式过滤器。 &hellip;">
+  <meta name="description" content="为了更好的理解scrolleview里的tilepages技巧，我在这里写一些读代码心得。 tilepages技巧大家都见过，在tableview里就实现这一技巧。基本原理是在一个UIScrollView里添加另一个UIScrollView的子类。这另一个UIScrollView可以是图片等， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,154 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/06/18/tilepages-for-uiscrollview/">Tilepages for Uiscrollview</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-18T10:12:00+08:00" pubdate data-updated="true">Jun 18<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>为了更好的理解scrolleview里的tilepages技巧，我在这里写一些读代码心得。</p>
+
+<p>tilepages技巧大家都见过，在tableview里就实现这一技巧。基本原理是在一个UIScrollView里添加另一个UIScrollView的子类。这另一个UIScrollView可以是图片等，以图片做例子，加入一屏就显示一张图片，那么每次滚动就只加载一张图片，其他的可缓存使用。
+我先贴出主要的代码</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">tilePosts</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Calculate which pages are visible</span>
+</span><span class='line'>    <span class="n">CGRect</span> <span class="n">visibleBounds</span> <span class="o">=</span> <span class="n">_pagingScrollView</span><span class="p">.</span><span class="n">bounds</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">firstNeededPageIndex</span> <span class="o">=</span> <span class="n">floorf</span><span class="p">(</span><span class="n">CGRectGetMinX</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">)</span> <span class="o">/</span> <span class="n">CGRectGetWidth</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">));</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">lastNeededPageIndex</span>  <span class="o">=</span> <span class="n">floorf</span><span class="p">((</span><span class="n">CGRectGetMaxX</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">CGRectGetWidth</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">firstNeededPageIndex</span> <span class="o">=</span> <span class="n">MAX</span><span class="p">(</span><span class="n">firstNeededPageIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">lastNeededPageIndex</span>  <span class="o">=</span> <span class="n">MIN</span><span class="p">(</span><span class="n">lastNeededPageIndex</span><span class="p">,</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">postList</span> <span class="n">count</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// Recycle no-longer-visible pages </span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">PostView</span> <span class="o">*</span><span class="n">postView</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">visiblePages</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">postView</span><span class="p">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="n">firstNeededPageIndex</span> <span class="o">||</span> <span class="n">postView</span><span class="p">.</span><span class="n">index</span> <span class="o">&gt;</span> <span class="n">lastNeededPageIndex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">recycledPages</span> <span class="nl">addObject:</span><span class="n">postView</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">postView</span> <span class="n">removeFromSuperview</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">visiblePages</span> <span class="nl">minusSet:</span><span class="n">self</span><span class="p">.</span><span class="n">recycledPages</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// add missing pages</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">firstNeededPageIndex</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">lastNeededPageIndex</span><span class="p">;</span> <span class="n">index</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">self</span> <span class="nl">isDisplayingPageForIndex:</span><span class="n">index</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">PostView</span> <span class="o">*</span><span class="n">page</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="n">dequeueRecycledPage</span><span class="p">];</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">page</span> <span class="o">==</span> <span class="nb">nil</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">page</span> <span class="o">=</span> <span class="p">[[</span><span class="n">PostView</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">self</span> <span class="nl">configurePost:</span><span class="n">page</span> <span class="nl">forIndex:</span><span class="n">index</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">_pagingScrollView</span> <span class="nl">addSubview:</span><span class="n">page</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">_visiblePages</span> <span class="nl">addObject:</span><span class="n">page</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上代码是从wwdc2010的photoscroll demo中复制出来的，这段代码演示的是直屏状态下横向滑动。
+1. visibleBounds代码可视区域，在我做的电子杂志项目中就是全屏。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/06/15/arc-for-cf/">Arc for Cf</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-15T16:55:00+08:00" pubdate data-updated="true">Jun 15<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>早上地铁上看到的，这里记一下备忘。</p>
+
+<ol>
+<li>当你是把用（copy, new, or create）创建的CF对象声明成为objectc对象时，用CFBridgingRelease()或者<strong>brige</strong>transfer</li>
+<li>当你是把autoreleased的objectc对象声明成为CF对象时，用CFBridgingRetain()
+3: 其他情况就仅仅用__bride相互声明转换就可以了</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1892,659 +2040,6 @@ Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/10/cocoa-graphic-2/">Cocoa_graphic_2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-10T13:05:00+08:00" pubdate data-updated="true">Apr 10<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>上一篇的学习介绍了基本的mac oxs上绘图的知识，下面我们来了解更多!</p>
-
-<h3>Drawing with Cells</h3>
-
-<p>这章介绍如何利用cocoa本身提供的控件来帮助绘图。苹果鼓励视图无状态，即视图本身保持的状态尽量少，把状态留给数据源来提供。而控件恰恰是最好的视图与数据源结合的工具。比如文本空间，它本身的作用就是在指定的矩形区域内显示文字。大部分的控件都是用于显示特定的数据，比如两种核心的控件就是显示文字和图片。</p>
-
-<p>如果你需要让控件相应事件，你可以用下面的方法</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nl">trackMouse:</span> <span class="p">(</span><span class="n">NSEvent</span><span class="o">*</span><span class="p">)</span><span class="n">theEvent</span>
-</span><span class='line'>                  <span class="err">　</span><span class="nl">inRect:</span> <span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">cellFrame</span>
-</span><span class='line'>                  <span class="err">　</span><span class="nl">ofView:</span> <span class="p">(</span><span class="n">NSView</span><span class="o">*</span><span class="p">)</span><span class="n">controlView</span>
-</span><span class='line'>          <span class="nl">untilMouseUp:</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="n">untilMouseUp</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当触发此时间时，cocoa会同时空间重绘，所以务必记得此时没用用此空间来绘画。我们将通过一个例子来演示如何使用cell来绘图。</p>
-
-<p>对于本示例，我们首先要做的是定义接口</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">    </span>
-</span><span class='line'><span class="cp"> #import &lt;Cocoa/Cocoa.h&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">@interface</span> <span class="nc">EqualizerView</span> : <span class="nc">NSView</span> <span class="p">{</span>
-</span><span class='line'>      <span class="kt">IBOutlet</span> <span class="kt">id</span> <span class="n">datasource</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">NSLevelIndicatorCell</span> <span class="o">*</span><span class="n">cell</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">NSLevelIndicatorCell</span> <span class="o">*</span><span class="n">editCell</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">NSUInteger</span> <span class="n">trackingRow</span><span class="p">;</span>
-</span><span class='line'>      <span class="n">NSRect</span> <span class="n">trackingFrame</span><span class="p">;</span>
-</span><span class='line'>       <span class="p">}</span>
-</span><span class='line'>   <span class="k">@end</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="err">@</span><span class="n">interface</span> <span class="n">NSObject</span> <span class="p">(</span><span class="n">EqualizerDataSource</span><span class="p">)</span>
-</span><span class='line'>       <span class="o">-</span> <span class="p">(</span><span class="n">NSUInteger</span><span class="p">)</span> <span class="nl">numberOfRowsInEqualizerView:</span><span class="p">(</span><span class="n">EqualizerView</span><span class="o">*</span><span class="p">)</span><span class="n">equalizer</span><span class="p">;</span>
-</span><span class='line'>       <span class="o">-</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span> <span class="nl">equalizerView:</span><span class="p">(</span><span class="n">EqualizerView</span><span class="o">*</span><span class="p">)</span><span class="n">equalizer</span>
-</span><span class='line'>       <span class="nl">valueAtRow:</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">)</span><span class="n">aRow</span><span class="p">;</span>
-</span><span class='line'>       <span class="c1">// Optional:</span>
-</span><span class='line'>       <span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nl">equalizerView:</span><span class="p">(</span><span class="n">EqualizerView</span><span class="o">*</span><span class="p">)</span><span class="n">equalizer</span>
-</span><span class='line'>       <span class="nl">setValue:</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">aValue</span>
-</span><span class='line'>       <span class="nl">atRow:</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">)</span><span class="n">aRow</span><span class="p">;</span>
-</span><span class='line'>   <span class="k">@end</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 这里我们定义了两个接口，一个是EqualizerView的，一个是用于数据源定义的非正式协议.注意datasource的类型是id,因为不希望限定数据源的类型，我们也可以要求数据源实现数据源协议，这一般是推荐的。</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">    </span>
-</span><span class='line'><span class="cp">#import &quot;EqualizerDelegateExample.h&quot; </span>
-</span><span class='line'>
-</span><span class='line'><span class="k">@class</span> <span class="nc">EqualizerView</span>;
-</span><span class='line'>
-</span><span class='line'><span class="k">@implementation</span> <span class="nc">EqualizerDelegateExample</span>
-</span><span class='line'><span class="o">-</span> <span class="p">(</span><span class="kt">id</span><span class="p">)</span> <span class="n">init</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nb">nil</span> <span class="o">==</span> <span class="p">(</span><span class="n">self</span> <span class="o">=</span> <span class="p">[</span><span class="n">super</span> <span class="n">init</span><span class="p">])){</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nb">nil</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">10</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">i</span> <span class="o">/</span> <span class="mi">10</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>      <span class="k">return</span> <span class="n">self</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">)</span> <span class="nl">numberOfRowsInEqualizerView:</span><span class="p">(</span><span class="n">EqualizerView</span><span class="o">*</span><span class="p">)</span><span class="n">equalizer</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="mi">10</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span> <span class="nl">equalizerView:</span><span class="p">(</span><span class="n">EqualizerView</span><span class="o">*</span><span class="p">)</span><span class="n">equalizer</span>
-</span><span class='line'>                       <span class="nl">valueAtRow:</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">)</span><span class="n">aRow</span>
-</span><span class='line'> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="n">values</span><span class="p">[</span><span class="n">aRow</span><span class="p">];</span>
-</span><span class='line'> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nl">equalizerView:</span><span class="p">(</span><span class="n">EqualizerView</span><span class="o">*</span><span class="p">)</span><span class="n">equalizer</span> <span class="nl">setValue:</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">aValue</span>
-</span><span class='line'>                 <span class="nl">atRow:</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">)</span><span class="n">aRow</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>      <span class="n">values</span><span class="p">[</span><span class="n">aRow</span><span class="p">]</span> <span class="o">=</span> <span class="n">aValue</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>￼￼
-上面的代码实现的数据源协议，它由一个由１０个浮点型数字组成的数组来提供数据。接下来是view的实现</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
-</span><span class='line'>  <span class="k">static</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">IndicatorBoxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
-</span><span class='line'>  <span class="c1">// 调用此方法会创建了两个cell备用</span>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">createCells</span><span class="p">{</span>
-</span><span class='line'>    <span class="n">cell</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSLevelIndicatorCell</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithLevelIndicatorStyle:</span>
-</span><span class='line'>      <span class="n">NSDiscreteCapacityLevelIndicatorStyle</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">cell</span> <span class="nl">setMaxValue:</span><span class="n">IndicatorBoxes</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">cell</span> <span class="nl">setWarningValue:</span><span class="n">IndicatorBoxes</span><span class="o">/</span><span class="mi">2</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">cell</span> <span class="nl">setCriticalValue:</span><span class="n">IndicatorBoxes</span><span class="o">/</span><span class="mi">4</span><span class="o">*</span><span class="mi">3</span><span class="p">];</span>
-</span><span class='line'>      <span class="n">editCell</span> <span class="o">=</span> <span class="p">[</span><span class="n">cell</span> <span class="n">copy</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">editCell</span> <span class="nl">setEditable:</span><span class="n">YES</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">editCell</span> <span class="nl">setContinuous:</span><span class="n">YES</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">editCell</span> <span class="nl">setTarget:</span><span class="n">self</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">editCell</span> <span class="nl">setAction:</span><span class="k">@selector</span><span class="p">(</span><span class="nl">cellValueChanged:</span><span class="p">)];</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">awakeFromNib</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">self</span> <span class="n">createCells</span><span class="p">];</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="nl">initWithFrame:</span><span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">frame</span><span class="p">{</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nb">nil</span> <span class="o">==</span> <span class="p">(</span><span class="n">self</span> <span class="o">=</span> <span class="p">[</span><span class="n">super</span> <span class="nl">initWithFrame:</span><span class="n">frame</span><span class="p">]))</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nb">nil</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">self</span> <span class="n">createCells</span><span class="p">];</span>
-</span><span class='line'>  <span class="k">return</span> <span class="n">self</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">dealloc</span><span class="p">{</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">editCell</span> <span class="n">release</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">cell</span> <span class="n">release</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">super</span> <span class="n">dealloc</span><span class="p">];</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最关键的是drawrect方法,他使用了数据源提供的数据用于绘制,如果你改变了数据源的数据量，就要 [self setNeedsDisplay: YES]　来重绘视图</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
-</span><span class='line'> <span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span><span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span><span class="p">{</span>
-</span><span class='line'> <span class="c1">//从数据源获得数据</span>
-</span><span class='line'> <span class="n">NSUInteger</span> <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">datasource</span> <span class="nl">numberOfRowsInEqualizerView:</span><span class="n">self</span><span class="p">];</span>
-</span><span class='line'> <span class="c1">//获得本身的bounds</span>
-</span><span class='line'> <span class="n">NSRect</span> <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="n">bounds</span><span class="p">];</span>
-</span><span class='line'> <span class="c1">// cellsize,段度就是本身的宽度，高度是数据源提供的数据量平均分</span>
-</span><span class='line'> <span class="n">NSSize</span> <span class="n">cellSize</span> <span class="o">=</span> <span class="p">{</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="n">rows</span><span class="p">};</span>
-</span><span class='line'> <span class="c1">// cell的y坐标变量</span>
-</span><span class='line'> <span class="n">CGFloat</span> <span class="n">y</span><span class="o">=</span> <span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">cellSize</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">　</span><span class="k">for</span><span class="p">(</span><span class="n">NSUInteger</span> <span class="n">row</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span> <span class="n">row</span><span class="o">&lt;</span><span class="n">rows</span> <span class="p">;</span> <span class="n">row</span><span class="o">++</span><span class="p">){</span>
-</span><span class='line'>      <span class="c1">// 设置cell的矩形</span>
-</span><span class='line'>      <span class="n">NSRect</span> <span class="n">cellLocation</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">},</span> <span class="n">cellSize</span> <span class="p">};</span>
-</span><span class='line'>      <span class="c1">// cell位移</span>
-</span><span class='line'>      <span class="n">y</span> <span class="o">-=</span> <span class="n">cellSize</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
-</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">NSIntersectsRect</span><span class="p">(</span><span class="n">cellLocation</span><span class="p">,</span> <span class="n">rect</span><span class="p">)){</span>
-</span><span class='line'>          <span class="kt">double</span> <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">datasource</span> <span class="nl">equalizerView:</span><span class="n">self</span> <span class="nl">valueAtRow:</span><span class="n">row</span><span class="p">];</span>
-</span><span class='line'>      <span class="n">value</span> <span class="o">*=</span> <span class="n">IndicatorBoxes</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">cell</span> <span class="nl">setDoubleValue:</span><span class="n">value</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">cell</span> <span class="nl">drawWithFrame:</span><span class="n">cellLocation</span><span class="err">　</span><span class="nl">inView:</span><span class="n">self</span><span class="p">];</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>我用书里的代码做了一个demo,具体可以看&#8221;mac/4/&#8221;里的demo</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/09/cocoa-graphic/">Cocoa_graphic</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-09T11:05:00+08:00" pubdate data-updated="true">Apr 9<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>此篇文字用于记录学习阅读cocoa programming handbook所做的笔记!</p>
-
-<p>cocoa的图形系统使用的是PostScript drawing model.基本原理是基于Path(路径)结合线条，曲线来构成图形。文字是路径结合制定的字体来绘制。</p>
-
-<p>注意：osx上绘图是由AppKit提供，iPhone上由UIKit提供，不过他们都遵循同样的模型机制，UIkit提供API接口的是core　graphic，是基于C的，osx上的是object-c实现的。</p>
-
-<h2>上下文图形会话</h2>
-
-<p>任何时候要开始手工绘制图形，首先必须要做的是获得当前的上下文图形会话，它是表示当前会话状态的对象。图形会话表示当前状态下绘画窗口的相对坐标，前景色，背景色等等的信息。一个直接从PostScript drawing model继承下来的方法是会话状态保存，你可以保存当前的状态到堆栈以便稍后使用</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
-</span><span class='line'>    <span class="c1">// AppKit:</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">NSGraphicsContext</span> <span class="n">saveGraphicsState</span><span class="p">];</span>
-</span><span class='line'>    <span class="c1">// drawing code...</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">NSGraphicsContext</span> <span class="n">restoreGraphicsState</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Quartz 2D:</span>
-</span><span class='line'>    <span class="err">￼￼</span><span class="n">CGContextSaveGState</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
-</span><span class='line'>    <span class="c1">// drawing code...</span>
-</span><span class='line'>    <span class="n">CGContextRestoreGState</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>下面一段暂时是?，需要实验以后理解</p>
-
-<h2>Core Graphics</h2>
-
-<p>Quartz 2D,也可以叫Core Graphics,是最底层的绘图API,他们提供了C　API来做基于PDF的绘图操作。我们看看一段代码来学习,自定义一个view</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="err">￼</span>
-</span><span class='line'><span class="cp">  #import &quot;MouseTrackView.h&quot; </span>
-</span><span class='line'><span class="cp">  #include &lt;Quartz/Quartz.h&gt;</span>
-</span><span class='line'>  <span class="err">@</span><span class="n">implementation</span> <span class="n">MouseTrackView</span> <span class="o">-</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">awakeFromNib</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>      <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="n">new</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">//　cocoa view默认的绘图方法，一切绘图操作都应放在这里</span>
-</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span><span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span><span class="p">{</span>
-</span><span class='line'>    <span class="c1">// 如果没有point就直接返回</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">([</span><span class="n">points</span> <span class="n">count</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>    <span class="c1">//　获得当前的图形上下文</span>
-</span><span class='line'>    <span class="n">NSGraphicsContext</span> <span class="o">*</span><span class="n">context</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSGraphicsContext</span> <span class="n">currentContext</span><span class="p">];</span>
-</span><span class='line'>    <span class="n">CGContextRef</span> <span class="n">cgContext</span> <span class="o">=</span> <span class="p">[</span><span class="n">context</span> <span class="n">graphicsPort</span><span class="p">];</span>
-</span><span class='line'>    <span class="c1">// 设置线条的填充宽度</span>
-</span><span class='line'>    <span class="n">CGContextSetLineWidth</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="mf">2.0f</span><span class="p">);</span>
-</span><span class='line'>    <span class="c1">// 设置线条的填充颜色</span>
-</span><span class='line'>    <span class="n">CGContextSetStrokeColorWithColor</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span><span class="n">CGColorGetConstantColor</span><span class="p">(</span><span class="n">kCGColorBlack</span><span class="p">));</span>
-</span><span class='line'>    <span class="c1">// 开始绘画路径，相当于准备开始移动画笔</span>
-</span><span class='line'>    <span class="n">CGContextBeginPath</span><span class="p">(</span><span class="n">cgContext</span><span class="p">);</span>
-</span><span class='line'>    <span class="c1">// 获得起始坐标，转换NSPoint到CGPoint</span>
-</span><span class='line'>    <span class="n">CGPoint</span> <span class="n">firstPoint</span> <span class="o">=</span> <span class="n">NSPointToCGPoint</span><span class="p">([[</span><span class="n">points</span> <span class="nl">objectAtIndex:</span><span class="mi">0</span><span class="p">]</span><span class="err">　</span><span class="n">pointValue</span><span class="p">]);</span>
-</span><span class='line'>    <span class="c1">// 移动画笔到起始坐标</span>
-</span><span class='line'>    <span class="n">CGContextMoveToPoint</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="n">firstPoint</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">firstPoint</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
-</span><span class='line'>    <span class="c1">// 绘制从其实坐标到坐标数组内的各个坐标的直线</span>
-</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">NSValue</span> <span class="o">*</span><span class="n">point</span> <span class="k">in</span> <span class="n">points</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="n">CGPoint</span> <span class="n">pt</span> <span class="o">=</span> <span class="n">NSPointToCGPoint</span><span class="p">([</span><span class="n">point</span> <span class="n">pointValue</span><span class="p">]);</span>
-</span><span class='line'>      <span class="n">CGContextAddLineToPoint</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="n">pt</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pt</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="c1">// 正式会话，把上面的操作在画布上画出来</span>
-</span><span class='line'>    <span class="n">CGContextDrawPath</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="n">kCGPathStroke</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">mouseDown:</span><span class="p">(</span><span class="n">NSEvent</span> <span class="o">*</span><span class="p">)</span><span class="n">theEvent</span><span class="p">{</span>
-</span><span class='line'>    <span class="c1">// 获得点击后的坐标</span>
-</span><span class='line'>    <span class="n">NSPoint</span> <span class="n">click</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertPoint:</span><span class="p">[</span><span class="n">theEvent</span> <span class="n">locationInWindow</span><span class="p">]</span> <span class="nl">fromView:</span><span class="nb">nil</span><span class="p">];</span>
-</span><span class='line'>    <span class="c1">// 保持的坐标数组中</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">points</span> <span class="nl">addObject:</span><span class="p">[</span><span class="n">NSValue</span> <span class="nl">valueWithPoint:</span><span class="n">click</span><span class="p">]];</span>
-</span><span class='line'>    <span class="c1">// 重绘当前View</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">self</span> <span class="nl">setNeedsDisplay:</span><span class="n">YES</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">dealloc</span><span class="p">{</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">points</span> <span class="n">release</span><span class="p">];</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">super</span> <span class="n">dealloc</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>AppKit Drawing</h2>
-
-<p>AppKit为我们提供了直接使用objectc来绘图的API。这样我们就可以在更高端的视角来做绘图操作。在这里，你不比直接和图形上下文打交道，如果设置线条颜色，使用AppKit我们可以用下面的方式来实现</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">blackColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Drawing Shapes</h2>
-
-<p>Cocoa里最重要的绘图函数末过与NSBezierPath，它封装了PostScript path，你可以保持坐标点然后在把画出来。它可以比Quartz共有效率。还是上面的例子，实际上我们绘制了太多遍，下面我们来看一个使用Appkit的实现</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">  #import &quot;MouseTrackView.h&quot;</span>
-</span><span class='line'>  <span class="k">@implementation</span> <span class="nc">MouseTrackView</span>
-</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span> <span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// path是一个NSBezierPath对象，实例变量</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">path</span> <span class="n">stroke</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">mouseDown:</span> <span class="p">(</span><span class="n">NSEvent</span><span class="o">*</span><span class="p">)</span><span class="n">theEvent</span><span class="p">{</span>
-</span><span class='line'>    <span class="c1">//获得点击坐标点</span>
-</span><span class='line'>    <span class="n">NSPoint</span> <span class="n">click</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertPoint:</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">locationInWindow</span><span class="p">]</span> <span class="nl">fromView:</span> <span class="nb">nil</span><span class="p">];</span>
-</span><span class='line'>    <span class="c1">//　初始化NSBezierPath对象</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">nil</span> <span class="o">==</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">new</span><span class="p">];</span>
-</span><span class='line'>      <span class="c1">//把做标点移到点击点</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">path</span> <span class="nl">moveToPoint:</span> <span class="n">click</span><span class="p">];</span>
-</span><span class='line'>      <span class="c1">//把NSBezierPath对象的线条宽度设为2</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">path</span> <span class="nl">setLineWidth:</span> <span class="mi">2</span><span class="p">];</span>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>      <span class="c1">// 绘制从初始点到点击点的线条</span>
-</span><span class='line'>      <span class="p">[</span><span class="n">path</span> <span class="nl">lineToPoint:</span> <span class="n">click</span><span class="p">];</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">self</span> <span class="nl">setNeedsDisplay:</span> <span class="n">YES</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">dealloc</span><span class="p">{</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">path</span> <span class="n">release</span><span class="p">];</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">super</span> <span class="n">dealloc</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>到目前为止，我们还只限于画线条，下面我们来看看怎么用NSBezierPath来画各式形状</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">#import &quot;BezierTrack.h&quot;</span>
-</span><span class='line'><span class="k">@implementation</span> <span class="nc">BezierTrack</span>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span> <span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span><span class="p">{</span>
-</span><span class='line'>  <span class="c1">// 初始化一个bezier路径</span>
-</span><span class='line'>  <span class="n">NSBezierPath</span> <span class="o">*</span><span class="n">control1</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">bezierPath</span><span class="p">];</span>
-</span><span class='line'>  <span class="c1">// 移到初始点</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="nl">moveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
-</span><span class='line'>  <span class="c1">// 画一条到目标点的直线</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="nl">lineToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]];</span>
-</span><span class='line'>  <span class="c1">// 设置线条颜色</span>
-</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">redColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
-</span><span class='line'>  <span class="c1">// 设置宽度</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="nl">setLineWidth:</span> <span class="mi">2</span><span class="p">];</span>
-</span><span class='line'>  <span class="c1">// 填充线条</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="n">stroke</span><span class="p">];</span>
-</span><span class='line'>  <span class="c1">// 初始化一个bezier路径,并绘制一条绿色的线条</span>
-</span><span class='line'>  <span class="n">NSBezierPath</span> <span class="o">*</span><span class="n">control2</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">bezierPath</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="nl">moveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">]];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="nl">lineToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">3</span><span class="p">]];</span>
-</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">greenColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="nl">setLineWidth:</span> <span class="mi">2</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="n">stroke</span><span class="p">];</span>
-</span><span class='line'>  <span class="c1">// 绘制一个曲线，并填充线条与内部</span>
-</span><span class='line'>  <span class="n">NSBezierPath</span> <span class="o">*</span><span class="n">curve</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">bezierPath</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="nl">moveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="nl">curveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-</span><span class='line'>        <span class="nl">controlPoint1:</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'>        <span class="nl">controlPoint2:</span> <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">]];</span>
-</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">grayColor</span><span class="p">]</span> <span class="n">setFill</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">blackColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="n">fill</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="n">stroke</span><span class="p">];</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">mouseDown:</span> <span class="p">(</span><span class="n">NSEvent</span> <span class="o">*</span><span class="p">)</span><span class="n">theEvent</span><span class="p">{</span>
-</span><span class='line'>  <span class="n">NSPoint</span> <span class="n">click</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertPoint:</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">locationInWindow</span><span class="p">]</span> <span class="nl">fromView:</span> <span class="nb">nil</span><span class="p">];</span>
-</span><span class='line'>  <span class="c1">// 定义４个Point，依次设置click的值</span>
-</span><span class='line'>  <span class="n">points</span><span class="p">[</span><span class="n">pointCount</span><span class="o">++</span> <span class="o">%</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">click</span><span class="p">;</span>
-</span><span class='line'>  <span class="c1">// 如果４个点都设置好了就重绘</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">pointCount</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="p">[</span><span class="n">self</span> <span class="nl">setNeedsDisplay:</span> <span class="n">YES</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">@end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2560,6 +2055,14 @@ Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2012/06/18/tilepages-for-uiscrollview/">tilepages for uiscrollview</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/15/arc-for-cf/">arc for cf</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
       </li>
     
@@ -2569,14 +2072,6 @@ Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内�
     
       <li class="post">
         <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
       </li>
     
   </ul>

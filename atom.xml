@@ -4,7 +4,7 @@
   <title><![CDATA[Keep faith, Stay strong]]></title>
   <link href="http://wear.github.com/atom.xml" rel="self"/>
   <link href="http://wear.github.com/"/>
-  <updated>2012-06-07T13:41:26+08:00</updated>
+  <updated>2012-07-06T17:36:50+08:00</updated>
   <id>http://wear.github.com/</id>
   <author>
     <name><![CDATA[KongLingLiang]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[tilepages for uiscrollview]]></title>
+    <link href="http://wear.github.com/blog/2012/06/18/tilepages-for-uiscrollview/"/>
+    <updated>2012-06-18T10:12:00+08:00</updated>
+    <id>http://wear.github.com/blog/2012/06/18/tilepages-for-uiscrollview</id>
+    <content type="html"><![CDATA[<p>为了更好的理解scrolleview里的tilepages技巧，我在这里写一些读代码心得。</p>
+
+<p>tilepages技巧大家都见过，在tableview里就实现这一技巧。基本原理是在一个UIScrollView里添加另一个UIScrollView的子类。这另一个UIScrollView可以是图片等，以图片做例子，加入一屏就显示一张图片，那么每次滚动就只加载一张图片，其他的可缓存使用。
+我先贴出主要的代码</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">tilePosts</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Calculate which pages are visible</span>
+</span><span class='line'>    <span class="n">CGRect</span> <span class="n">visibleBounds</span> <span class="o">=</span> <span class="n">_pagingScrollView</span><span class="p">.</span><span class="n">bounds</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">firstNeededPageIndex</span> <span class="o">=</span> <span class="n">floorf</span><span class="p">(</span><span class="n">CGRectGetMinX</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">)</span> <span class="o">/</span> <span class="n">CGRectGetWidth</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">));</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">lastNeededPageIndex</span>  <span class="o">=</span> <span class="n">floorf</span><span class="p">((</span><span class="n">CGRectGetMaxX</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">CGRectGetWidth</span><span class="p">(</span><span class="n">visibleBounds</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">firstNeededPageIndex</span> <span class="o">=</span> <span class="n">MAX</span><span class="p">(</span><span class="n">firstNeededPageIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">lastNeededPageIndex</span>  <span class="o">=</span> <span class="n">MIN</span><span class="p">(</span><span class="n">lastNeededPageIndex</span><span class="p">,</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">postList</span> <span class="n">count</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// Recycle no-longer-visible pages </span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">PostView</span> <span class="o">*</span><span class="n">postView</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">visiblePages</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">postView</span><span class="p">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="n">firstNeededPageIndex</span> <span class="o">||</span> <span class="n">postView</span><span class="p">.</span><span class="n">index</span> <span class="o">&gt;</span> <span class="n">lastNeededPageIndex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">recycledPages</span> <span class="nl">addObject:</span><span class="n">postView</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">postView</span> <span class="n">removeFromSuperview</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">visiblePages</span> <span class="nl">minusSet:</span><span class="n">self</span><span class="p">.</span><span class="n">recycledPages</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// add missing pages</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">firstNeededPageIndex</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">lastNeededPageIndex</span><span class="p">;</span> <span class="n">index</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">self</span> <span class="nl">isDisplayingPageForIndex:</span><span class="n">index</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">PostView</span> <span class="o">*</span><span class="n">page</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="n">dequeueRecycledPage</span><span class="p">];</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">page</span> <span class="o">==</span> <span class="nb">nil</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">page</span> <span class="o">=</span> <span class="p">[[</span><span class="n">PostView</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">self</span> <span class="nl">configurePost:</span><span class="n">page</span> <span class="nl">forIndex:</span><span class="n">index</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">_pagingScrollView</span> <span class="nl">addSubview:</span><span class="n">page</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">_visiblePages</span> <span class="nl">addObject:</span><span class="n">page</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上代码是从wwdc2010的photoscroll demo中复制出来的，这段代码演示的是直屏状态下横向滑动。
+1. visibleBounds代码可视区域，在我做的电子杂志项目中就是全屏。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[arc for cf]]></title>
+    <link href="http://wear.github.com/blog/2012/06/15/arc-for-cf/"/>
+    <updated>2012-06-15T16:55:00+08:00</updated>
+    <id>http://wear.github.com/blog/2012/06/15/arc-for-cf</id>
+    <content type="html"><![CDATA[<p>早上地铁上看到的，这里记一下备忘。</p>
+
+<ol>
+<li>当你是把用（copy, new, or create）创建的CF对象声明成为objectc对象时，用CFBridgingRelease()或者<strong>brige</strong>transfer</li>
+<li>当你是把autoreleased的objectc对象声明成为CF对象时，用CFBridgingRetain()
+3: 其他情况就仅仅用__bride相互声明转换就可以了</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[coretext part 2: markparser and images]]></title>
