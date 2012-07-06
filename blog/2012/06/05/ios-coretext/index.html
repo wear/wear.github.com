@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>ios coretext - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="Coretext学习 我们来通过制作一期打喷嚏图卦来学习如何运用coretext. Coretext是从ios3.2开始加入到被ios支持的，它能让你实现对文字样式的完全控制。coretext基于UIkit与core graphy之间，它能让你自定义文字的布局样式等细节， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/06/05/ios-coretext">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ios Coretext</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-05T16:48:00+08:00" pubdate data-updated="true">Jun 5<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>Coretext学习</h1>
+
+<p>我们来通过制作一期打喷嚏图卦来学习如何运用coretext.</p>
+
+<p>Coretext是从ios3.2开始加入到被ios支持的，它能让你实现对文字样式的完全控制。coretext基于UIkit与core graphy之间，它能让你自定义文字的布局样式等细节，它也替你管理了字体文字换行等设计到文本的细节。</p>
+
+<p>使用coretext你必须导入coretext库。下面我们先学习最基础的使用</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span><span class="p">(</span><span class="n">CGRect</span><span class="p">)</span><span class="n">rect</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">super</span> <span class="nl">drawRect:</span><span class="n">rect</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">CGContextRef</span> <span class="n">context</span> <span class="o">=</span> <span class="n">UIGraphicsGetCurrentContext</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CGMutablePathRef</span> <span class="n">path</span> <span class="o">=</span> <span class="n">CGPathCreateMutable</span><span class="p">();</span> <span class="c1">//1</span>
+</span><span class='line'>    <span class="n">CGPathAddRect</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">bounds</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">NSAttributedString</span><span class="o">*</span> <span class="n">attString</span> <span class="o">=</span> <span class="p">[[[</span><span class="n">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span>
+</span><span class='line'>        <span class="nl">initWithString:</span><span class="s">@&quot;Hello core text world!&quot;</span><span class="p">]</span> <span class="n">autorelease</span><span class="p">];</span> <span class="c1">//2</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CTFramesetterRef</span> <span class="n">framesetter</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">CTFramesetterCreateWithAttributedString</span><span class="p">((</span><span class="n">CFAttributedStringRef</span><span class="p">)</span><span class="n">attString</span><span class="p">);</span> <span class="c1">//3</span>
+</span><span class='line'>    <span class="n">CTFrameRef</span> <span class="n">frame</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">CTFramesetterCreateFrame</span><span class="p">(</span><span class="n">framesetter</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">attString</span> <span class="n">length</span><span class="p">]),</span> <span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CTFrameDraw</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">context</span><span class="p">);</span> <span class="c1">//4</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CFRelease</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span> <span class="c1">//5</span>
+</span><span class='line'>    <span class="n">CFRelease</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">CFRelease</span><span class="p">(</span><span class="n">framesetter</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在view的drawrect:方法里使用coretext,依据如下的步骤</p>
+
+<ul>
+<li><p>你需要创建路径，在路径里写字，目前ios上只支持矩形路径。</p></li>
+<li><p>使用coretext,文字的处理你必须使用NSAttributedString,而不是NSString，NSAttributedString是NSString的派生类，它让你可以对文本应用样式</p></li>
+<li><p>CTFramesetterRef是coretext最重要的概念，他管理文本的自体信息和绘画帧，它通过CTFramesetterCreateWithAttributedString创建，CTFramesetterCreateWithAttributedString方式用所给的NSAttributedString所带的文本与文本样式初始化，然后，你创建一个文本布局（CTFrameRef），你需要文本帧（CTFramesetterRef），用范围表示的一段文本，与相应的路径。</p></li>
+<li><p>让后用CTFrameDraw在当前的图形会话里绘制文本。</p></li>
+<li><p>然后，确保用*create方法创建的对象都要释放。</p></li>
+</ul>
+
+
+<p>运行以后的结果可能有点出乎意料，文本都在左下脚，这是因为Quartz与uikit的坐标系不一样，Quartz的坐标系在左下脚，UIKit在左上脚。所以我们需要调整一下坐标系</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// Flip the coordinate system</span>
+</span><span class='line'><span class="n">CGContextSetTextMatrix</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">CGAffineTransformIdentity</span><span class="p">);</span>
+</span><span class='line'><span class="n">CGContextTranslateCTM</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class='line'><span class="n">CGContextScaleCTM</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>代码很少，但信息量很大。我们简单介入介绍一下。CoreText使用的是Quartz的坐标系，所以要使用一些Quartz的变形技巧来实现坐标系转换。</p>
+
+<h3>Quartz变形</h3>
+
+<p>Quartz绘图模型定义了两种坐标，用户坐标和和设备坐标，用户坐标是一个浮点数，与设备分辨率和像素无关，当你想要打印你的文档时，Quartz会把用户坐标对应到设备坐标上。</p>
+
+<p>你可以听过操作当前变形矩形(current transformation matrix,CTM)修改你的预定义的用户坐标。当你创建了图形会话后，CTM就是单元矩阵。</p>
+
+<p>Quartz提供了５个函数让你可以方便的平移，缩放，旋转你的会话坐标，你可以定义操作的顺序，组合。Quartz同时也提供创建映射转换的函数，你可以先创建映射转换，它不会马上改变CTM,直到你决定使用时。使用Quartz函数你不需要理解内容的矩阵数据逻辑，只需要使用相应的内置函数就可以了。
+注解：形象的说，就是操作当前的画布，移动画布，旋转画图，缩放画布。</p>
+
+<h4>修改CTM</h4>
+
+<p>在修改CTM时你可能需要保存你的图形绘画，这样你的修改只对当前图形会话起做作用，在操作完以后返回原来的图形绘画继续使用原来的CTM.</p>
+
+<p>首先，我们在当前图形会话里画一张图</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">CGContextDrawImage</span> <span class="p">(</span><span class="n">myContext</span><span class="p">,</span> <span class="n">rect</span><span class="p">,</span> <span class="n">myImage</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Translation让你可以移动你的图形，比如</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">CGContextTranslateCTM</span> <span class="p">(</span><span class="n">myContext</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面这段话让你把当前的CTM沿X轴移动了100个单位，y轴移动了50个单位。</p>
+
+<p>Rotation让你可以旋转你的绘图，比如</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">CGContextRotateCTM</span> <span class="p">(</span><span class="n">myContext</span><span class="p">,</span> <span class="n">radians</span><span class="p">(</span><span class="err">–</span><span class="mf">45.</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>让你的绘图选择了-45度。</p>
+
+<p>Scaling让你可以缩放你的绘画的坐标系，通过制定x,y轴比例，你可以高效的放大或缩小你的绘图。x,y因素的级别直接决定了绘图是放大还是缩小。有一个额外的效果是，如果你制定的x或y参数是负数，坐标系会翻转，这一点在把Quartz的原始坐标画出来的图形到uikit的坐标系下时尤为管用。</p>
+
+<h3>回到coretext</h3>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// Flip the coordinate system</span>
+</span><span class='line'><span class="n">CGContextSetTextMatrix</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">CGAffineTransformIdentity</span><span class="p">);</span>
+</span><span class='line'><span class="n">CGContextTranslateCTM</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class='line'><span class="n">CGContextScaleCTM</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码就比较好理解了。首先，CGContextSetTextMatrix从文本空间到用户空间的转换矩阵，coretext的文本有自己的CTM，需要把它转到当前的CTM上，形象的说，就是文本原来头朝下，现在改成头超上。CGContextTranslateCTM，把当前的坐标系下移到可见范围外，然后翻转y轴的坐标，就得到了正确的效果。</p>
+
+<h2>CoreText模型</h2>
+
+<p>下面，我们来深入理解下CoreText的文本渲染模型。下图是CoreText的文本渲染模型的图形化描述</p>
+
+<p><img src="/images/CTClasses-500x340.jpg" alt="CoreText的文本渲染模型" /></p>
+
+<p>你创建一个CTFramesetter引用并提供相应的NSAttributedString,一个CTTypesetter的实例会自动创建，它会帮你管理文本的字体。然后你就可以创建一个或多个frames来渲染的你文本。</p>
+
+<p>创建frames时你要提供相应要显示的文本范围和矩形，根据你提供的参数CoreText会自动为计算行数并为每行创建CTLine，使用相同的样式为每个文字创建CTRun。需要注意的是，你不需要自己创建CTRun,CoreText会根据你提供的NSAttributedString的文字属性为你自动创建，所有的CTRun都有自己的属性，所以你可以通过CTRun完全控制文本的大小，字间距等等信息。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-05T16:48:00+08:00" pubdate data-updated="true">Jun 5<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/06/04/newsstanded-app/" title="Previous Post: newsstanded app">&laquo; newsstanded app</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/06/06/coretext-part-2-markparser-and-images/" title="next Post: coretext part 2: markparser and images">coretext part 2: markparser and images &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

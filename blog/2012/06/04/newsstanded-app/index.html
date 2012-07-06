@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>newsstanded app - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="IOS学习，新闻杂志类App 从ios5开始，apple提供了一类新的应用类型，新闻杂志类应用。此类应用有一些特殊的效果，如当有新的内容时，ios会自动从下载新内容，并提供一个计数图标来提醒用户，甚至可以修改应用的图标来对应最新的内容。所有这些效果都有一个叫 Newsstanded &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/06/04/newsstanded-app">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Newsstanded App</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-04T09:57:00+08:00" pubdate data-updated="true">Jun 4<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>IOS学习，新闻杂志类App</h1>
+
+<p>从ios5开始，apple提供了一类新的应用类型，新闻杂志类应用。此类应用有一些特殊的效果，如当有新的内容时，ios会自动从下载新内容，并提供一个计数图标来提醒用户，甚至可以修改应用的图标来对应最新的内容。所有这些效果都有一个叫 Newsstanded Kit的开发包提供。
+Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内容，在你的应用没有运行时系统内置的可以在后台自动下载内容的方法。</p>
+
+<h3>如何使用Newsstanded Kit?</h3>
+
+<ul>
+<li>导入Newsstanded库，需要注意的是，因为你可能随时要用Newsstanded库里的方法，所以可以考虑把</li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">    </span>
+</span><span class='line'><span class="cp">#import &lt;NewsstandKit/NewsstandKit.h&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>放在support目录的.pch文件里，这样你就可以在项目里的任意类使用NewsstandKit的方法。</p>
+
+<ul>
+<li></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-04T09:57:00+08:00" pubdate data-updated="true">Jun 4<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/05/15/what-is-mock-and-stub/" title="Previous Post: what is mock and stub?">&laquo; what is mock and stub?</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/06/05/ios-coretext/" title="next Post: ios coretext">ios coretext &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

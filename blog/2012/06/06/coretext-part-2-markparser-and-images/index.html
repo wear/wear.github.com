@@ -1,0 +1,870 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>coretext part 2: markparser and images - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="CoreText第二季：文本样式与图片实现 上文已经提到，我们可以通过设置NSAttributedString的属性来控制文本的样式，但是这有一个问题，如果是一大段文字，你要对里面的许多文字设置样式，那工作量就太大了，所以我们需要一个样式过滤器，下面我们来创建一个简单的样式过滤器。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/06/06/coretext-part-2-markparser-and-images">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Coretext Part 2: Markparser and Images</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-06T13:32:00+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>CoreText第二季：文本样式与图片实现</h1>
+
+<p>上文已经提到，我们可以通过设置NSAttributedString的属性来控制文本的样式，但是这有一个问题，如果是一大段文字，你要对里面的许多文字设置样式，那工作量就太大了，所以我们需要一个样式过滤器，下面我们来创建一个简单的样式过滤器。新建一个MarkupParser类，创建如下属性</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">NSString</span><span class="o">*</span> <span class="n">font</span><span class="p">;</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">UIColor</span><span class="o">*</span> <span class="n">color</span><span class="p">;</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">UIColor</span><span class="o">*</span> <span class="n">strokeColor</span><span class="p">;</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="n">assign</span><span class="p">,</span> <span class="n">readwrite</span><span class="p">)</span> <span class="kt">float</span> <span class="n">strokeWidth</span><span class="p">;</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">NSMutableArray</span><span class="o">*</span> <span class="n">images</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在初始化时就设置初始变量</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="n">init</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">self</span> <span class="o">=</span> <span class="p">[</span><span class="n">super</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="s">@&quot;Arial&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="n">blackColor</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">strokeColor</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="n">whiteColor</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">strokeWidth</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">self</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后，添加解析样式的方法</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span><span class="p">(</span><span class="n">NSAttributedString</span><span class="o">*</span><span class="p">)</span><span class="nl">attrStringFromMarkup:</span><span class="p">(</span><span class="n">NSString</span><span class="o">*</span><span class="p">)</span><span class="n">markup</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">NSMutableAttributedString</span><span class="o">*</span> <span class="n">aString</span> <span class="o">=</span>
+</span><span class='line'>    <span class="p">[[</span><span class="n">NSMutableAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString:</span><span class="s">@&quot;&quot;</span><span class="p">];</span> <span class="c1">//1</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">regex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span>
+</span><span class='line'>                                  <span class="nl">initWithPattern:</span><span class="s">@&quot;(.*?)(&lt;[^&gt;]+&gt;|</span><span class="se">\\</span><span class="s">Z)&quot;</span>
+</span><span class='line'>                                  <span class="nl">options:</span><span class="n">NSRegularExpressionCaseInsensitive</span><span class="o">|</span><span class="n">NSRegularExpressionDotMatchesLineSeparators</span>
+</span><span class='line'>                                  <span class="nl">error:</span><span class="nb">nil</span><span class="p">];</span> <span class="c1">//2</span>
+</span><span class='line'>    <span class="n">NSArray</span><span class="o">*</span> <span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">regex</span> <span class="nl">matchesInString:</span><span class="n">markup</span> <span class="nl">options:</span><span class="mi">0</span>
+</span><span class='line'>                                       <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">markup</span> <span class="n">length</span><span class="p">])];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">NSTextCheckingResult</span><span class="o">*</span> <span class="n">b</span> <span class="k">in</span> <span class="n">chunks</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">NSArray</span><span class="o">*</span> <span class="n">parts</span> <span class="o">=</span> <span class="p">[[</span><span class="n">markup</span> <span class="nl">substringWithRange:</span><span class="n">b</span><span class="p">.</span><span class="n">range</span><span class="p">]</span>
+</span><span class='line'>                          <span class="nl">componentsSeparatedByString:</span><span class="s">@&quot;&lt;&quot;</span><span class="p">];</span> <span class="c1">//1</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">CTFontRef</span> <span class="n">fontRef</span> <span class="o">=</span> <span class="n">CTFontCreateWithName</span><span class="p">((</span><span class="n">__bridge</span> <span class="n">CFStringRef</span><span class="p">)</span><span class="n">self</span><span class="p">.</span><span class="n">font</span><span class="p">,</span>
+</span><span class='line'>                                                 <span class="mf">24.0f</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//apply the current text style //2</span>
+</span><span class='line'>        <span class="n">NSDictionary</span><span class="o">*</span> <span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObjectsAndKeys:</span>
+</span><span class='line'>                               <span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="n">self</span><span class="p">.</span><span class="n">color</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="n">kCTForegroundColorAttributeName</span><span class="p">,</span>
+</span><span class='line'>                               <span class="p">(</span><span class="n">__bridge</span> <span class="kt">id</span><span class="p">)</span><span class="n">fontRef</span><span class="p">,</span> <span class="n">kCTFontAttributeName</span><span class="p">,</span>
+</span><span class='line'>                               <span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="n">self</span><span class="p">.</span><span class="n">strokeColor</span><span class="p">.</span><span class="n">CGColor</span><span class="p">,</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span> <span class="n">kCTStrokeColorAttributeName</span><span class="p">,</span>
+</span><span class='line'>                               <span class="p">(</span><span class="kt">id</span><span class="p">)[</span><span class="n">NSNumber</span> <span class="nl">numberWithFloat:</span> <span class="n">self</span><span class="p">.</span><span class="n">strokeWidth</span><span class="p">],</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="n">kCTStrokeWidthAttributeName</span><span class="p">,</span>
+</span><span class='line'>                               <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">aString</span> <span class="nl">appendAttributedString:</span><span class="p">[[</span><span class="n">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString:</span><span class="p">[</span><span class="n">parts</span> <span class="nl">objectAtIndex:</span><span class="mi">0</span><span class="p">]</span> <span class="nl">attributes:</span><span class="n">attrs</span><span class="p">]];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">CFRelease</span><span class="p">(</span><span class="n">fontRef</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//handle new formatting tag //3</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">([</span><span class="n">parts</span> <span class="n">count</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">NSString</span><span class="o">*</span> <span class="n">tag</span> <span class="o">=</span> <span class="p">(</span><span class="n">NSString</span><span class="o">*</span><span class="p">)[</span><span class="n">parts</span> <span class="nl">objectAtIndex:</span><span class="mi">1</span><span class="p">];</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">([</span><span class="n">tag</span> <span class="nl">hasPrefix:</span><span class="s">@&quot;font&quot;</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>                <span class="c1">//stroke color</span>
+</span><span class='line'>                <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">scolorRegex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithPattern:</span><span class="s">@&quot;(?&lt;=strokeColor=</span><span class="se">\&quot;</span><span class="s">)</span><span class="se">\\</span><span class="s">w+&quot;</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">error:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class='line'>                <span class="p">[</span><span class="n">scolorRegex</span> <span class="nl">enumerateMatchesInString:</span><span class="n">tag</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="n">length</span><span class="p">])</span> <span class="nl">usingBlock:</span><span class="o">^</span><span class="p">(</span><span class="n">NSTextCheckingResult</span> <span class="o">*</span><span class="n">match</span><span class="p">,</span> <span class="n">NSMatchingFlags</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">){</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="p">([[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span><span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">]</span> <span class="nl">isEqualToString:</span><span class="s">@&quot;none&quot;</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>                        <span class="n">self</span><span class="p">.</span><span class="n">strokeWidth</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+</span><span class='line'>                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                        <span class="n">self</span><span class="p">.</span><span class="n">strokeWidth</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">;</span>
+</span><span class='line'>                        <span class="kt">SEL</span> <span class="n">colorSel</span> <span class="o">=</span> <span class="n">NSSelectorFromString</span><span class="p">([</span><span class="n">NSString</span> <span class="nl">stringWithFormat:</span> <span class="s">@&quot;%@Color&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span><span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">]]);</span>
+</span><span class='line'>                        <span class="n">self</span><span class="p">.</span><span class="n">strokeColor</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nl">performSelector:</span><span class="n">colorSel</span><span class="p">];</span>
+</span><span class='line'>                    <span class="p">}</span>
+</span><span class='line'>                <span class="p">}];</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="c1">//color</span>
+</span><span class='line'>                <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">colorRegex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithPattern:</span><span class="s">@&quot;(?&lt;=color=</span><span class="se">\&quot;</span><span class="s">)</span><span class="se">\\</span><span class="s">w+&quot;</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">error:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class='line'>                <span class="p">[</span><span class="n">colorRegex</span> <span class="nl">enumerateMatchesInString:</span><span class="n">tag</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="n">length</span><span class="p">])</span> <span class="nl">usingBlock:</span><span class="o">^</span><span class="p">(</span><span class="n">NSTextCheckingResult</span> <span class="o">*</span><span class="n">match</span><span class="p">,</span> <span class="n">NSMatchingFlags</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">){</span>
+</span><span class='line'>                    <span class="kt">SEL</span> <span class="n">colorSel</span> <span class="o">=</span> <span class="n">NSSelectorFromString</span><span class="p">([</span><span class="n">NSString</span> <span class="nl">stringWithFormat:</span> <span class="s">@&quot;%@Color&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span><span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">]]);</span>
+</span><span class='line'>                    <span class="n">self</span><span class="p">.</span><span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="nl">performSelector:</span><span class="n">colorSel</span><span class="p">];</span>
+</span><span class='line'>                <span class="p">}];</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="c1">//face</span>
+</span><span class='line'>                <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">faceRegex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithPattern:</span><span class="s">@&quot;(?&lt;=face=</span><span class="se">\&quot;</span><span class="s">)[^</span><span class="se">\&quot;</span><span class="s">]+&quot;</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">error:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class='line'>                <span class="p">[</span><span class="n">faceRegex</span> <span class="nl">enumerateMatchesInString:</span><span class="n">tag</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="n">length</span><span class="p">])</span> <span class="nl">usingBlock:</span><span class="o">^</span><span class="p">(</span><span class="n">NSTextCheckingResult</span> <span class="o">*</span><span class="n">match</span><span class="p">,</span> <span class="n">NSMatchingFlags</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">){</span>
+</span><span class='line'>                    <span class="n">self</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span><span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">];</span>
+</span><span class='line'>                <span class="p">}];</span>
+</span><span class='line'>            <span class="p">}</span> <span class="c1">//end of font parsing</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="p">(</span><span class="n">NSAttributedString</span><span class="o">*</span><span class="p">)</span><span class="n">aString</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>代码量比较大，我们来详细解释。</p>
+
+<blockquote><p>原理是我们是正则匹配给出的文本的样式标签，转化为相应的NSAttributedString</p></blockquote>
+
+<ol>
+<li><p>创建一个正则表达式，这个正则匹配两种模式，一种是普通字符，还有一种是一&#8221;&lt;*>&#8221;开头，&#8221;>&#8221;解决的带标签的字符，接着直接结尾。并用此正则去匹配给出的文本。</p></li>
+<li><p>循环匹配结果，把每个结果从文本中分类出来，并用&#8221;&lt;&#8221;切分，如果是普通文字，parts[0]就是文本本身，所过是带标签的，parts[1]是标记</p></li>
+<li><p>用与定义的样式为每个文字创建样式</p></li>
+<li><p>如果是带样式标签的，检查是否以font开头，如果是的话，用正则去匹配标签属性，比如color,face等信息，应用到相应的类属性上去，这样下一段文字开始时用的就是设置好的属性样式</p></li>
+</ol>
+
+
+<p>上面就是一个简单的可以解析字体标签的样式解析器</p>
+
+<h2>创建一个基本的两栏布局</h2>
+
+<p>基本的样式有了，更多的样式可以后面添加，为了更好的显示文本，我们来创建一个两栏的文本布局来显示文本。</p>
+
+<blockquote><p> 原理是我们创建一个显示文本栏的类，它来显示文本，而最初的view就用来分页，滚动，和创建创建栏位。</p></blockquote>
+
+<p>我们创建一个名为postColumnView的UIView子类，并重写的它的drawrect:方法</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span><span class="p">(</span><span class="n">CGRect</span><span class="p">)</span><span class="n">rect</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">CGContextRef</span> <span class="n">context</span> <span class="o">=</span> <span class="n">UIGraphicsGetCurrentContext</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Flip the coordinate system</span>
+</span><span class='line'>    <span class="n">CGContextSetTextMatrix</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">CGAffineTransformIdentity</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">CGContextTranslateCTM</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">CGContextScaleCTM</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CTFrameDraw</span><span class="p">((</span><span class="n">CTFrameRef</span><span class="p">)</span><span class="n">ctFrame</span><span class="p">,</span> <span class="n">context</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>它的作用就是翻转坐标系，并调用CTFrameDraw函数把给出的CTFrameRef在当前图形会话里写出来，它本身的大小布局等留给postView来做。</p>
+
+<p>在PostView里添加如下的方法</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">buildFrames</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">_frameXOffset</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="c1">//1</span>
+</span><span class='line'>    <span class="n">_frameYOffset</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">pagingEnabled</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">self</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CGMutablePathRef</span> <span class="n">path</span> <span class="o">=</span> <span class="n">CGPathCreateMutable</span><span class="p">();</span> <span class="c1">//2</span>
+</span><span class='line'>    <span class="n">CGRect</span> <span class="n">textFrame</span> <span class="o">=</span> <span class="n">CGRectInset</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">_frameXOffset</span><span class="p">,</span> <span class="n">_frameYOffset</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">CGPathAddRect</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">textFrame</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CTFramesetterRef</span> <span class="n">framesetter</span> <span class="o">=</span> <span class="n">CTFramesetterCreateWithAttributedString</span><span class="p">((</span><span class="n">__bridge</span> <span class="n">CFAttributedStringRef</span><span class="p">)</span><span class="n">_attString</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">textPos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//3</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">columnIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="n">textPos</span> <span class="o">&lt;</span> <span class="p">[</span><span class="n">_attString</span> <span class="n">length</span><span class="p">])</span> <span class="p">{</span> <span class="c1">//4</span>
+</span><span class='line'>        <span class="n">CGPoint</span> <span class="n">colOffset</span> <span class="o">=</span> <span class="n">CGPointMake</span><span class="p">(</span> <span class="p">(</span><span class="n">columnIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">_frameXOffset</span> <span class="o">+</span> <span class="n">columnIndex</span><span class="o">*</span><span class="p">(</span><span class="n">textFrame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">20</span> <span class="p">);</span>
+</span><span class='line'>        <span class="n">CGRect</span> <span class="n">colRect</span> <span class="o">=</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="n">textFrame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">textFrame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="o">-</span><span class="mi">40</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">CGMutablePathRef</span> <span class="n">path</span> <span class="o">=</span> <span class="n">CGPathCreateMutable</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">CGPathAddRect</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">colRect</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//use the column path</span>
+</span><span class='line'>        <span class="n">CTFrameRef</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">CTFramesetterCreateFrame</span><span class="p">(</span><span class="n">framesetter</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="n">textPos</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">CFRange</span> <span class="n">frameRange</span> <span class="o">=</span> <span class="n">CTFrameGetVisibleStringRange</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span> <span class="c1">//5</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//create an empty column view</span>
+</span><span class='line'>        <span class="n">PostColumnView</span><span class="o">*</span> <span class="n">content</span> <span class="o">=</span> <span class="p">[[</span><span class="n">PostColumnView</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithFrame:</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">contentSize</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">contentSize</span><span class="p">.</span><span class="n">height</span><span class="p">)];</span>
+</span><span class='line'>        <span class="n">content</span><span class="p">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIColor</span> <span class="n">clearColor</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">content</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="n">colOffset</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">colOffset</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">colRect</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">colRect</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1">//set the column view contents and add it as subview</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">content</span> <span class="nl">setPostFrame:</span><span class="p">(</span><span class="n">__bridge</span> <span class="kt">id</span><span class="p">)</span><span class="n">frame</span><span class="p">];</span>  <span class="c1">//6   </span>
+</span><span class='line'>        <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">frames</span> <span class="nl">addObject:</span> <span class="p">(</span><span class="n">__bridge</span> <span class="kt">id</span><span class="p">)</span><span class="n">frame</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">self</span> <span class="nl">addSubview:</span> <span class="n">content</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//prepare for next frame</span>
+</span><span class='line'>        <span class="n">textPos</span> <span class="o">+=</span> <span class="n">frameRange</span><span class="p">.</span><span class="n">length</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//CFRelease(frame);</span>
+</span><span class='line'>        <span class="n">CFRelease</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">columnIndex</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//set the total width of the scroll view</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">totalPages</span> <span class="o">=</span> <span class="p">(</span><span class="n">columnIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">//7</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">contentSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="n">totalPages</span><span class="o">*</span><span class="n">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">textFrame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>代码量比较大，继续详细解释。</p>
+
+<ol>
+<li><p>首先设置一些边距，并引用分页滚动，设置滚动代理等，初始化。</p></li>
+<li><p>创建一个矩形路径(textFrame)，缩进页边距</p></li>
+<li><p>用给出的属性文本创建CTFramesetterRef（）</p></li>
+<li><p>遍历文本，先取得一个textFrame一半大并带一定缩进的矩形，创建一个栏位去显示它。然后用这个矩形用CTFrameGetVisibleStringRange得可以显示的文本范围。如果没有显示完，就继续创建栏位，直到显示完全。注意CFRangeMake第一个参数是位置，第二个参数是长度，如果第一个参数texpost可以跳过一定长度的文本，第二个参数对CTFramesetterCreateFrame来说如果是０的话，Framesetter就默认一直显示文本，直到跳出给出path的显示区域为止。</p></li>
+<li><p>按栏位书设置内容尺寸</p></li>
+</ol>
+
+
+<h2>显示图片</h2>
+
+<p>CoreText本身是不支持图片显示的，不过它也留了一个后门，你可以办法在要显示图片的地方预留一些空间，然后在上面画图。
+如何预留空间呢？因为每个字都是一个CTRun的实例，CTRun可以设置代理，由代理负责它的上升空间，下沉空间和宽度。</p>
+
+<p><img src="/images/CTRunDelegate-500x223.jpg" alt="CTRun的代理模型" /></p>
+
+<p>我们来先添加一个解析图片标签的方法</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">if</span> <span class="p">([</span><span class="n">tag</span> <span class="nl">hasPrefix:</span><span class="s">@&quot;img&quot;</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">__block</span> <span class="n">NSNumber</span><span class="o">*</span> <span class="n">width</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithInt:</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">__block</span> <span class="n">NSNumber</span><span class="o">*</span> <span class="n">height</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithInt:</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">__block</span> <span class="n">NSString</span><span class="o">*</span> <span class="n">fileName</span> <span class="o">=</span> <span class="s">@&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//width</span>
+</span><span class='line'>    <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">widthRegex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithPattern:</span><span class="s">@&quot;(?&lt;=width=</span><span class="se">\&quot;</span><span class="s">)[^</span><span class="se">\&quot;</span><span class="s">]+&quot;</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">error:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">widthRegex</span> <span class="nl">enumerateMatchesInString:</span><span class="n">tag</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="n">length</span><span class="p">])</span> <span class="nl">usingBlock:</span><span class="o">^</span><span class="p">(</span><span class="n">NSTextCheckingResult</span> <span class="o">*</span><span class="n">match</span><span class="p">,</span> <span class="n">NSMatchingFlags</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">){</span>
+</span><span class='line'>        <span class="n">width</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithInt:</span> <span class="p">[[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span> <span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">]</span> <span class="n">intValue</span><span class="p">]</span> <span class="p">];</span>
+</span><span class='line'>    <span class="p">}];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//height</span>
+</span><span class='line'>    <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">faceRegex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithPattern:</span><span class="s">@&quot;(?&lt;=height=</span><span class="se">\&quot;</span><span class="s">)[^</span><span class="se">\&quot;</span><span class="s">]+&quot;</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">error:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">faceRegex</span> <span class="nl">enumerateMatchesInString:</span><span class="n">tag</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="n">length</span><span class="p">])</span> <span class="nl">usingBlock:</span><span class="o">^</span><span class="p">(</span><span class="n">NSTextCheckingResult</span> <span class="o">*</span><span class="n">match</span><span class="p">,</span> <span class="n">NSMatchingFlags</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">){</span>
+</span><span class='line'>        <span class="n">height</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithInt:</span> <span class="p">[[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span><span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">]</span> <span class="n">intValue</span><span class="p">]];</span>
+</span><span class='line'>    <span class="p">}];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//image</span>
+</span><span class='line'>    <span class="n">NSRegularExpression</span><span class="o">*</span> <span class="n">srcRegex</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSRegularExpression</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithPattern:</span><span class="s">@&quot;(?&lt;=src=</span><span class="se">\&quot;</span><span class="s">)[^</span><span class="se">\&quot;</span><span class="s">]+&quot;</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">error:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">srcRegex</span> <span class="nl">enumerateMatchesInString:</span><span class="n">tag</span> <span class="nl">options:</span><span class="mi">0</span> <span class="nl">range:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tag</span> <span class="n">length</span><span class="p">])</span> <span class="nl">usingBlock:</span><span class="o">^</span><span class="p">(</span><span class="n">NSTextCheckingResult</span> <span class="o">*</span><span class="n">match</span><span class="p">,</span> <span class="n">NSMatchingFlags</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">){</span>
+</span><span class='line'>        <span class="n">fileName</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="nl">substringWithRange:</span> <span class="n">match</span><span class="p">.</span><span class="n">range</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//add the image for drawing</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="nl">addObject:</span>
+</span><span class='line'>     <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObjectsAndKeys:</span>
+</span><span class='line'>      <span class="n">width</span><span class="p">,</span> <span class="s">@&quot;width&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">height</span><span class="p">,</span> <span class="s">@&quot;height&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">fileName</span><span class="p">,</span> <span class="s">@&quot;fileName&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithInt:</span> <span class="p">[</span><span class="n">aString</span> <span class="n">length</span><span class="p">]],</span> <span class="s">@&quot;location&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">nil</span><span class="p">]</span>
+</span><span class='line'>     <span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//render empty space for drawing the image in the text //1</span>
+</span><span class='line'>    <span class="n">CTRunDelegateCallbacks</span> <span class="n">callbacks</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">callbacks</span><span class="p">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">kCTRunDelegateVersion1</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">callbacks</span><span class="p">.</span><span class="n">getAscent</span> <span class="o">=</span> <span class="n">ascentCallback</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">callbacks</span><span class="p">.</span><span class="n">getDescent</span> <span class="o">=</span> <span class="n">descentCallback</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">callbacks</span><span class="p">.</span><span class="n">getWidth</span> <span class="o">=</span> <span class="n">widthCallback</span><span class="p">;</span>
+</span><span class='line'><span class="c1">//                callbacks.dealloc = deallocCallback;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">NSDictionary</span><span class="o">*</span> <span class="n">imgAttr</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObjectsAndKeys:</span> <span class="c1">//2</span>
+</span><span class='line'>                              <span class="n">width</span><span class="p">,</span> <span class="s">@&quot;width&quot;</span><span class="p">,</span>
+</span><span class='line'>                              <span class="n">height</span><span class="p">,</span> <span class="s">@&quot;height&quot;</span><span class="p">,</span>
+</span><span class='line'>                              <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CTRunDelegateRef</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">CTRunDelegateCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">callbacks</span><span class="p">,(</span><span class="n">__bridge</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">imgAttr</span><span class="p">);</span> <span class="c1">//3</span>
+</span><span class='line'>    <span class="n">NSDictionary</span> <span class="o">*</span><span class="n">attrDictionaryDelegate</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObjectsAndKeys:</span>
+</span><span class='line'>                                            <span class="c1">//set the delegate</span>
+</span><span class='line'>                                            <span class="p">(</span><span class="n">__bridge</span> <span class="kt">id</span><span class="p">)</span><span class="n">delegate</span><span class="p">,</span> <span class="p">(</span><span class="n">NSString</span><span class="o">*</span><span class="p">)</span><span class="n">kCTRunDelegateAttributeName</span><span class="p">,</span>
+</span><span class='line'>                                            <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//add a space to the text so that it can call the delegate</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">aString</span> <span class="nl">appendAttributedString:</span><span class="p">[[</span><span class="n">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString:</span><span class="s">@&quot; &quot;</span> <span class="nl">attributes:</span><span class="n">attrDictionaryDelegate</span><span class="p">]];</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码负责解析img标签，当碰到img打头的标签时,解析它属性，包括高度，宽度，文件命等信息，然后根据所给出的信息创建一个CTRun Delegete,在当前位置插入一个空字符串，并附带代理信息。</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cm">/* Callbacks */</span>
+</span><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">deallocCallback</span><span class="p">(</span> <span class="kt">void</span><span class="o">*</span> <span class="n">ref</span> <span class="p">){</span>
+</span><span class='line'>    <span class="p">[(</span><span class="kt">id</span><span class="p">)</span><span class="n">ref</span> <span class="n">release</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">static</span> <span class="n">CGFloat</span> <span class="n">ascentCallback</span><span class="p">(</span> <span class="kt">void</span> <span class="o">*</span><span class="n">ref</span> <span class="p">){</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">[(</span><span class="n">NSString</span><span class="o">*</span><span class="p">)[(</span><span class="n">NSDictionary</span><span class="o">*</span><span class="p">)</span><span class="n">ref</span> <span class="nl">objectForKey:</span><span class="s">@&quot;height&quot;</span><span class="p">]</span> <span class="n">floatValue</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">static</span> <span class="n">CGFloat</span> <span class="n">descentCallback</span><span class="p">(</span> <span class="kt">void</span> <span class="o">*</span><span class="n">ref</span> <span class="p">){</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">[(</span><span class="n">NSString</span><span class="o">*</span><span class="p">)[(</span><span class="n">NSDictionary</span><span class="o">*</span><span class="p">)</span><span class="n">ref</span> <span class="nl">objectForKey:</span><span class="s">@&quot;descent&quot;</span><span class="p">]</span> <span class="n">floatValue</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">static</span> <span class="n">CGFloat</span> <span class="n">widthCallback</span><span class="p">(</span> <span class="kt">void</span><span class="o">*</span> <span class="n">ref</span> <span class="p">){</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">[(</span><span class="n">NSString</span><span class="o">*</span><span class="p">)[(</span><span class="n">NSDictionary</span><span class="o">*</span><span class="p">)</span><span class="n">ref</span> <span class="nl">objectForKey:</span><span class="s">@&quot;width&quot;</span><span class="p">]</span> <span class="n">floatValue</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的三个计算函数负责把传过来的字典的样式信息计算出来并传递给CoreText,deallocCallback时代理在释放时调用的，所以在这这里需要释放保存的参数对象，这里时图片字典。</p>
+
+<p>记得之前在标签解析器里我们把所有图片都存在一个图片数组里，然后我们把这个数组传给PostView以显示。在显示图片之前，我们来详细了解的它的原点布局信息，下面的图片是布局的图形化表示
+<img src="/images/runBounds-420x500.jpg" alt="CTRun的布局" />
+要正确显示图片，我们需要知道</p>
+
+<ul>
+<li>栏位的滚动偏移量</li>
+<li>视图本身的偏移量</li>
+<li>CTLine的原点</li>
+<li>CTRun到CTLine原点的距离（CoreText的布局计算方式）</li>
+</ul>
+
+
+<p>下面就来显示图片</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">//at the end of drawRect:</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="n">NSArray</span><span class="o">*</span> <span class="n">imageData</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">images</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">UIImage</span><span class="o">*</span> <span class="n">img</span> <span class="o">=</span> <span class="p">[</span><span class="n">imageData</span> <span class="nl">objectAtIndex:</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">CGRect</span> <span class="n">imgBounds</span> <span class="o">=</span> <span class="n">CGRectFromString</span><span class="p">([</span><span class="n">imageData</span> <span class="nl">objectAtIndex:</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>    <span class="n">CGContextDrawImage</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">imgBounds</span><span class="p">,</span> <span class="n">img</span><span class="p">.</span><span class="n">CGImage</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码加在PostColumnView的drawRect:方法下，在给出的图片信息数组中遍历图形信息，并在相应的bounds上画出图片。</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">attachImagesWithFrame:</span><span class="p">(</span><span class="n">CTFrameRef</span><span class="p">)</span><span class="n">f</span> <span class="nl">inColumnView:</span><span class="p">(</span><span class="n">PostColumnView</span><span class="o">*</span><span class="p">)</span><span class="n">col</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">//drawing images</span>
+</span><span class='line'>    <span class="n">NSArray</span> <span class="o">*</span><span class="n">lines</span> <span class="o">=</span> <span class="p">(</span><span class="n">__bridge</span> <span class="n">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="n">CTFrameGetLines</span><span class="p">(</span><span class="n">f</span><span class="p">);</span> <span class="c1">//1</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CGPoint</span> <span class="n">origins</span><span class="p">[[</span><span class="n">lines</span> <span class="n">count</span><span class="p">]];</span>
+</span><span class='line'>    <span class="n">CTFrameGetLineOrigins</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">origins</span><span class="p">);</span> <span class="c1">//2</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">imgIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//3</span>
+</span><span class='line'>    <span class="n">NSDictionary</span><span class="o">*</span> <span class="n">nextImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="nl">objectAtIndex:</span><span class="n">imgIndex</span><span class="p">];</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">imgLocation</span> <span class="o">=</span> <span class="p">[[</span><span class="n">nextImage</span> <span class="nl">objectForKey:</span><span class="s">@&quot;location&quot;</span><span class="p">]</span> <span class="n">intValue</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//find images for the current column</span>
+</span><span class='line'>    <span class="n">CFRange</span> <span class="n">frameRange</span> <span class="o">=</span> <span class="n">CTFrameGetVisibleStringRange</span><span class="p">(</span><span class="n">f</span><span class="p">);</span> <span class="c1">//4</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span> <span class="n">imgLocation</span> <span class="o">&lt;</span> <span class="n">frameRange</span><span class="p">.</span><span class="n">location</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">imgIndex</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">imgIndex</span><span class="o">&gt;=</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="n">count</span><span class="p">])</span> <span class="k">return</span><span class="p">;</span> <span class="c1">//quit if no images for this column</span>
+</span><span class='line'>        <span class="n">nextImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="nl">objectAtIndex:</span><span class="n">imgIndex</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">imgLocation</span> <span class="o">=</span> <span class="p">[[</span><span class="n">nextImage</span> <span class="nl">objectForKey:</span><span class="s">@&quot;location&quot;</span><span class="p">]</span> <span class="n">intValue</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">NSUInteger</span> <span class="n">lineIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">id</span> <span class="n">lineObj</span> <span class="k">in</span> <span class="n">lines</span><span class="p">)</span> <span class="p">{</span> <span class="c1">//5</span>
+</span><span class='line'>        <span class="n">CTLineRef</span> <span class="n">line</span> <span class="o">=</span> <span class="p">(</span><span class="n">__bridge</span> <span class="n">CTLineRef</span><span class="p">)</span><span class="n">lineObj</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kt">id</span> <span class="n">runObj</span> <span class="k">in</span> <span class="p">(</span><span class="n">__bridge</span> <span class="n">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="n">CTLineGetGlyphRuns</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="p">{</span> <span class="c1">//6</span>
+</span><span class='line'>            <span class="n">CTRunRef</span> <span class="n">run</span> <span class="o">=</span> <span class="p">(</span><span class="n">__bridge</span> <span class="n">CTRunRef</span><span class="p">)</span><span class="n">runObj</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">CFRange</span> <span class="n">runRange</span> <span class="o">=</span> <span class="n">CTRunGetStringRange</span><span class="p">(</span><span class="n">run</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span> <span class="n">runRange</span><span class="p">.</span><span class="n">location</span> <span class="o">&lt;=</span> <span class="n">imgLocation</span> <span class="o">&amp;&amp;</span> <span class="n">runRange</span><span class="p">.</span><span class="n">location</span><span class="o">+</span><span class="n">runRange</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">imgLocation</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//7</span>
+</span><span class='line'>                <span class="n">CGRect</span> <span class="n">runBounds</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">CGFloat</span> <span class="n">ascent</span><span class="p">;</span><span class="c1">//height above the baseline</span>
+</span><span class='line'>                <span class="n">CGFloat</span> <span class="n">descent</span><span class="p">;</span><span class="c1">//height below the baseline</span>
+</span><span class='line'>                <span class="n">runBounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">CTRunGetTypographicBounds</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">ascent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">descent</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span> <span class="c1">//8</span>
+</span><span class='line'>                <span class="n">runBounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">ascent</span> <span class="o">+</span> <span class="n">descent</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">CGFloat</span> <span class="n">xOffset</span> <span class="o">=</span> <span class="n">CTLineGetOffsetForStringIndex</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">CTRunGetStringRange</span><span class="p">(</span><span class="n">run</span><span class="p">).</span><span class="n">location</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span> <span class="c1">//9</span>
+</span><span class='line'>                <span class="n">runBounds</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">origins</span><span class="p">[</span><span class="n">lineIndex</span><span class="p">].</span><span class="n">x</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">xOffset</span> <span class="o">+</span> <span class="n">_frameXOffset</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">runBounds</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">origins</span><span class="p">[</span><span class="n">lineIndex</span><span class="p">].</span><span class="n">y</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">_frameYOffset</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">runBounds</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span> <span class="o">-=</span> <span class="n">descent</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">UIImage</span> <span class="o">*</span><span class="n">img</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIImage</span> <span class="nl">imageNamed:</span> <span class="p">[</span><span class="n">nextImage</span> <span class="nl">objectForKey:</span><span class="s">@&quot;fileName&quot;</span><span class="p">]</span> <span class="p">];</span>
+</span><span class='line'>                <span class="n">CGPathRef</span> <span class="n">pathRef</span> <span class="o">=</span> <span class="n">CTFrameGetPath</span><span class="p">(</span><span class="n">f</span><span class="p">);</span> <span class="c1">//10</span>
+</span><span class='line'>                <span class="n">CGRect</span> <span class="n">colRect</span> <span class="o">=</span> <span class="n">CGPathGetBoundingBox</span><span class="p">(</span><span class="n">pathRef</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">CGRect</span> <span class="n">imgBounds</span> <span class="o">=</span> <span class="n">CGRectOffset</span><span class="p">(</span><span class="n">runBounds</span><span class="p">,</span> <span class="n">colRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">_frameXOffset</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">contentOffset</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">colRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">_frameYOffset</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class='line'>                <span class="p">[</span><span class="n">col</span><span class="p">.</span><span class="n">images</span> <span class="nl">addObject:</span> <span class="c1">//11</span>
+</span><span class='line'>                 <span class="p">[</span><span class="n">NSArray</span> <span class="nl">arrayWithObjects:</span><span class="n">img</span><span class="p">,</span> <span class="n">NSStringFromCGRect</span><span class="p">(</span><span class="n">imgBounds</span><span class="p">)</span> <span class="p">,</span> <span class="nb">nil</span><span class="p">]</span>
+</span><span class='line'>                 <span class="p">];</span>
+</span><span class='line'>                <span class="c1">//load the next image //12</span>
+</span><span class='line'>                <span class="n">imgIndex</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="n">imgIndex</span> <span class="o">&lt;</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="n">count</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="n">nextImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">images</span> <span class="nl">objectAtIndex:</span> <span class="n">imgIndex</span><span class="p">];</span>
+</span><span class='line'>                    <span class="n">imgLocation</span> <span class="o">=</span> <span class="p">[[</span><span class="n">nextImage</span> <span class="nl">objectForKey:</span> <span class="s">@&quot;location&quot;</span><span class="p">]</span> <span class="n">intValue</span><span class="p">];</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="n">lineIndex</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个函数做以下的事情</p>
+
+<ol>
+<li>通过CTFrameGetLines函数活动这个frame内的CTLine数量</li>
+<li>获得当前frame所包含的文本在整个文本的range，然后获得当前frame的图片</li>
+<li>先获得一张图片的location,如果小于frameRange,就查找下一张，直到找到location大于frameRange.location的图片为止。如果找到的图片数已经大于等总图片数就直接返回</li>
+<li>然后遍历所有行，在此行内再遍历所有CTRun，然后用CTRunGetTypographicBounds获得当前CTRun的宽度，上沿，下沿，这样就有了宽高。</li>
+</ol>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-06T13:32:00+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/06/05/ios-coretext/" title="Previous Post: ios coretext">&laquo; ios coretext</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

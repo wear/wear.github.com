@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>coreImage - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="本篇文字用于记录学习CoreImage 背景介绍 CoreImage是苹果的图像处理包，在OSX上已经存在一些年头了，从IOS５开始，苹果把它移到了iPhone上。CoreImage是Object-c框架，它包含了对基于像素的图片的处理和分析函数，包含各种滤镜，头像探测等。 使用CoreImage &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/04/19/coreimage">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">coreImage</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-19T09:43:00+08:00" pubdate data-updated="true">Apr 19<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本篇文字用于记录学习CoreImage</p>
+
+<h2>背景介绍</h2>
+
+<p>CoreImage是苹果的图像处理包，在OSX上已经存在一些年头了，从IOS５开始，苹果把它移到了iPhone上。CoreImage是Object-c框架，它包含了对基于像素的图片的处理和分析函数，包含各种滤镜，头像探测等。</p>
+
+<h2>使用CoreImage</h2>
+
+<p>使用CoreImage的步骤是</p>
+
+<ol>
+<li>创建一个新的 CIImage</li>
+<li>创建新的CIFilter，并提供足够的参数</li>
+<li>生成输出图片，输出图片是一个新的CIImage实例，你可以用它渲染图片或者应用新的滤镜</li>
+<li>渲染图片,渲染可以基于CPU或者　GPU</li>
+</ol>
+
+
+<p>IOS上有三种表示图片的方法，分别是UIImage,CIImage和CGImageRef，从前缀可以看出他们的从属框架，他们底层使用的数据是一样的，但是使用了不同的封装以提供对象属性。下面的代码演示了如果创建一个CIImage，注意它是从CGImageRef创建的</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'><span class="n">UIImage</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">imageView</span> <span class="n">image</span><span class="p">];</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">cgImage</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="n">CGImage</span><span class="p">;</span>
+</span><span class='line'><span class="n">CIImage</span> <span class="o">*</span><span class="n">coreImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">cgImage</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>CIImage和其他图片方法不一样的是它不是最终的产品，它像一个蓝图，你可以使用多个滤镜（滤镜链）来处理它，直到处理结束后在生成最终的结果。</p>
+
+<h3>滤镜</h3>
+
+<p>滤镜用于修改图片的独立像素。苹果的图片滤镜会更新比较快，作者写书的时候有４８中，你可以用一下代码获得所有可用的滤镜和他们的属性</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'> <span class="c1">// Create an array containing all available filter names</span>
+</span><span class='line'> <span class="n">NSArray</span> <span class="o">*</span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIFilter</span>
+</span><span class='line'><span class="nl">filterNamesInCategory:</span><span class="n">kCICategoryBuiltIn</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// Iterate through each filter name</span>
+</span><span class='line'> <span class="c1">// and output that filter’s attributes to the console</span>
+</span><span class='line'> <span class="k">for</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="n">filter</span> <span class="k">in</span> <span class="n">filters</span><span class="p">){</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// Create a new filter with the filter name</span>
+</span><span class='line'>   <span class="n">CIFilter</span> <span class="o">*</span><span class="n">myFilter</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIFilter</span> <span class="nl">filterWithName:</span><span class="n">filter</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// Output the filter name and attributes to the console</span>
+</span><span class='line'>   <span class="n">NSLog</span><span class="p">(</span><span class="err">@”</span><span class="o">%</span><span class="err">@”</span><span class="p">,</span><span class="n">filter</span><span class="p">);</span>
+</span><span class='line'>   <span class="n">NSLog</span><span class="p">(</span><span class="err">@”</span><span class="o">%</span><span class="err">@”</span><span class="p">,[</span><span class="n">myFilter</span> <span class="n">attributes</span><span class="p">]);</span>
+</span><span class='line'> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>每个滤镜都存在与一个或多个分类里,下面的代码演示如何创建一个滤镜</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'><span class="c1">// Create a new filter with the name CISepiaTone</span>
+</span><span class='line'><span class="n">CIFilter</span> <span class="o">*</span><span class="n">sepia</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIFilter</span> <span class="nl">filterWithName:</span><span class="err">@”</span><span class="n">CISepiaTone</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set the input image of the sepia tone filter</span>
+</span><span class='line'><span class="p">[</span><span class="n">sepia</span> <span class="nl">setValue:</span><span class="n">myCoreImage</span> <span class="nl">forKey:</span><span class="err">@”</span><span class="n">inputImage</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set the inputIntensity of the sepia tone filter</span>
+</span><span class='line'><span class="n">NSNumber</span> <span class="o">*</span><span class="n">intensity</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithFloat:</span><span class="mf">.5</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">sepia</span> <span class="nl">setValue:</span><span class="n">intensity</span> <span class="nl">forKey:</span><span class="err">@”</span><span class="n">inputIntensity</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Generate a new CIImage from the output image</span>
+</span><span class='line'><span class="c1">// of the sepia tone filter</span>
+</span><span class='line'><span class="n">CIImage</span> <span class="o">*</span><span class="n">outputImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">sepia</span> <span class="n">outputImage</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Core Image Context</h3>
+
+<p>Core Image context用于使用各种滤镜后渲染一个CIImage，当新建一个图片上下文的时候，它会基于CPU或者GPU初始化，当用CPU初始化的时候，使用它就与使用你的程序run loop里的其他对象没什么区别，当使用GCD的时候，它会用openGL２.０来渲染图片。使用GPU渲染路径的好处是你当前的程序RunLopp丝毫不受影响。</p>
+
+<p>CPU渲染了解和GPU渲染路径各有个的优缺点，使用CPU渲染滤镜的一个好处是你可以确保图片可以渲染完成，因为GPU渲染路径是不能转入后台运行的，GPU路径的话性能好。</p>
+
+<h4>Creating a new CIConteXt</h4>
+
+<p>从上面的讨论我们已经知道，有两种方法可以初始话一个图片上下文</p>
+
+<ul>
+<li>contextWithOptions: //　CPU渲染路径</li>
+<li>contextWithEAGLContext:　// GPU渲染路径</li>
+</ul>
+
+
+<p>需要注意的是当使用contextWithEAGLContext的时候，你必须提前创建好EAGLContext，EAGLContext是用于OpenGL绘画的，如果你使用的应用模版是“OpenGL Game”的话，Xcode已经为你创建好了，如果没有你就必须自己创建。</p>
+
+<p>下面的代码演示了如何创建一个CPU渲染路径,注意它使用了SoftwareRenderer，这不是必须的</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> <span class="n">NSDictionary</span> <span class="o">*</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObject:</span><span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithBool:</span><span class="n">YES</span><span class="p">]</span> <span class="nl">forKey:</span><span class="n">kCIContextUseSoftwareRenderer</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">CIContext</span> <span class="o">*</span><span class="n">newContext</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIContext</span> <span class="nl">contextWithOptions:</span><span class="n">options</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">self</span> <span class="nl">setImageContext:</span><span class="n">newContext</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>还有一点需要注意的是你无需为每个滤镜创建一个图形上下文，相反，你已经对始终使用一个，上面的例子就是把图片上下文设为实例变量来用</p>
+
+<h3>Rendering CIImages</h3>
+
+<p>一旦图片上下文创建以后，渲染图片就变的轻松多了。如果你是使用CPU渲染路径，你就可以把CIImage渲染成CGImageRef，以下的代码演示如果渲染图片</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// Render CIImage through CIContext to CGImageRef</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">cgImg</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">imageContext</span> <span class="nl">createCGImage:</span><span class="n">coreImage</span>
+</span><span class='line'><span class="nl">fromRect:</span><span class="p">[</span><span class="n">coreImage</span> <span class="n">extent</span><span class="p">]];</span>
+</span><span class='line'><span class="c1">// Set the UIImage of a UIImageView as an image created with</span>
+</span><span class='line'><span class="c1">// the newly created CGImageRef</span>
+</span><span class='line'><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">imageView</span> <span class="nl">setImage:</span><span class="p">[</span><span class="n">UIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">cgImg</span><span class="p">]];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的参数属性表示你想要渲染的图片矩形大小，extent方法表示原图片大小。</p>
+
+<h2>Analyzing Images</h2>
+
+<p>CoreImage为开发者提供了图片滤镜和面部识别，面部识别，是一个CIDetector类的操作，下面的代码演示和如何做面部识别</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> <span class="c1">// Create an array of optimized filters</span>
+</span><span class='line'> <span class="n">NSArray</span> <span class="o">*</span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span><span class="n">coreImage</span> <span class="n">autoAdjustmentFilters</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// Iterate through all the filters and apply them to our image</span>
+</span><span class='line'> <span class="k">for</span><span class="p">(</span><span class="n">CIFilter</span> <span class="o">*</span><span class="n">filter</span> <span class="k">in</span> <span class="n">filters</span><span class="p">){</span>
+</span><span class='line'> <span class="p">[</span><span class="n">filter</span> <span class="nl">setValue:</span><span class="n">coreImage</span> <span class="nl">forKey:</span><span class="n">kCIInputImageKey</span><span class="p">];</span>
+</span><span class='line'> <span class="n">coreImage</span> <span class="o">=</span> <span class="n">filter</span><span class="p">.</span><span class="n">outputImage</span><span class="p">;</span>
+</span><span class='line'> <span class="p">}</span>
+</span><span class='line'> <span class="c1">// Set up desired accuracy options dictionary</span>
+</span><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObject:</span><span class="n">CIDetectorAccuracyHigh</span>
+</span><span class='line'>
+</span><span class='line'><span class="nl">forKey:</span><span class="n">CIDetectorAccuracy</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create new CIDetector</span>
+</span><span class='line'><span class="n">CIDetector</span> <span class="o">*</span><span class="n">faceDetector</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIDetector</span>
+</span><span class='line'>                            <span class="nl">detectorOfType:</span><span class="n">CIDetectorTypeFace</span>
+</span><span class='line'>                            <span class="nl">context:</span><span class="n">self</span><span class="p">.</span><span class="n">imageContext</span>
+</span><span class='line'>                            <span class="nl">options:</span><span class="n">options</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSArray</span> <span class="o">*</span><span class="n">faces</span> <span class="o">=</span> <span class="p">[</span><span class="n">faceDetector</span> <span class="nl">featuresInImage:</span><span class="n">coreImage</span>
+</span><span class='line'>                                       <span class="nl">options:</span><span class="n">options</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码先调用了CoreImage的autoAdjustmentFilters并应用，autoAdjustmentFilters包括了颜色调整，消除红眼等操作。然后对图片做面部别。CIDetector的参数制定了CIDetectorAccuracyHigh制定了高精度，注意高精度需要高资源，所以你需要根据你自己的需求调整。还有需要注意的是你需要制定图片的方位，默认CIDetector眼睛在嘴巴上方，所以你必须注意调整。</p>
+
+<h3>Don’t BlOCk the maIn thread!</h3>
+
+<p>任何时候你都应该把图片操作放到后台线程运行，不能阻断主线程。下面的代码演示了如何使用做</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">dispatch_async</span><span class="p">(</span> <span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="n">DISPATCH_QUEUE_PRIORITY_BACKGROUND</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">^</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create CIImage from CGImageRef of our UIImageView’s image</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">cgImg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">imageView</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="n">CGImage</span><span class="p">;</span>
+</span><span class='line'><span class="n">CIImage</span> <span class="o">*</span><span class="n">coreImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">cgImg</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Iterate through all of our filters and apply</span>
+</span><span class='line'><span class="c1">// them to the CIImage</span>
+</span><span class='line'><span class="k">for</span><span class="p">(</span><span class="n">CIFilter</span> <span class="o">*</span><span class="n">filter</span> <span class="k">in</span> <span class="n">filters</span><span class="p">){</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">filter</span> <span class="nl">setValue:</span><span class="n">coreImage</span> <span class="nl">forKey:</span><span class="n">kCIInputImageKey</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">coreImage</span> <span class="o">=</span> <span class="n">filter</span><span class="p">.</span><span class="n">outputImage</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create a new CGImageRef by rendering through CIContext</span>
+</span><span class='line'><span class="c1">// This won’t slow down main thread since we’re in a</span>
+</span><span class='line'><span class="c1">// background dispatch queue</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">newImg</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">imageContext</span> <span class="nl">createCGImage:</span><span class="n">coreImage</span>
+</span><span class='line'><span class="nl">fromRect:</span><span class="p">[</span><span class="n">coreImage</span> <span class="n">extent</span><span class="p">]];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Dispatch a new process to the main queue</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span><span class='line'>  <span class="c1">// Update our image view on the main thread</span>
+</span><span class='line'>  <span class="c1">// You can also perform any other UI updates needed</span>
+</span><span class='line'>  <span class="c1">// here such as hiding activity spinners </span>
+</span><span class='line'>  <span class="n">self</span><span class="p">.</span><span class="n">imageView</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">newImg</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-19T09:43:00+08:00" pubdate data-updated="true">Apr 19<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/04/18/core-graphic-gradient/" title="Previous Post: core-graphic-gradient">&laquo; core-graphic-gradient</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/04/20/iosduo-mei-ti/" title="next Post: IOS多媒体">IOS多媒体 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

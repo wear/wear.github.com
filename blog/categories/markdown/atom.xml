@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: markdown | Keep faith, Stay strong]]></title>
+  <link href="http://wear.github.com/blog/categories/markdown/atom.xml" rel="self"/>
+  <link href="http://wear.github.com/"/>
+  <updated>2012-06-07T13:41:26+08:00</updated>
+  <id>http://wear.github.com/</id>
+  <author>
+    <name><![CDATA[KongLingLiang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Learning Markdown]]></title>
+    <link href="http://wear.github.com/blog/2012/02/07/learning-markdown/"/>
+    <updated>2012-02-07T10:00:00+08:00</updated>
+    <id>http://wear.github.com/blog/2012/02/07/learning-markdown</id>
+    <content type="html"><![CDATA[<p>此篇文字markdown的学习笔记，以便以后忘记时查看.</p>
+
+<blockquote><p>Markdown’s syntax is intended for one purpose: to be used as a format for writing for the web.</p></blockquote>
+
+<p>Markdown可以与Html混合使用，使用空格和换行作为与普通文字与其他标记比如HTML的区别标记。
+以下元素已经用markdown标记过，查看源文件可直接查看[原始格式]: http://www.sohu.com</p>
+
+<h3>块级元素</h3>
+
+<h1>这是H1</h1>
+
+<h2>这是H2</h2>
+
+<h3>这是H3</h3>
+
+<p>引用块</p>
+
+<blockquote><p>这是应用块1</p>
+
+<blockquote><p>这是应用块2</p></blockquote>
+
+<p>这是应用块1</p></blockquote>
+
+<p>列表</p>
+
+<ul>
+<li>列表1</li>
+<li>列表2</li>
+<li>列表3</li>
+</ul>
+
+
+<p>数字列表</p>
+
+<ol>
+<li>数字列表1</li>
+<li>数字列表2</li>
+<li>数字列表3</li>
+</ol>
+
+
+<p>大段的列表</p>
+
+<ol>
+<li><p>This is a list item with two paragraphs. Lorem ipsum dolor
+sit amet, consectetuer adipiscing elit. Aliquam hendrerit
+mi posuere lectus.</p>
+
+<p>Vestibulum enim wisi, viverra nec, fringilla in, laoreet
+vitae, risus. Donec sit amet nisl. Aliquam semper ipsum
+sit amet velit.</p></li>
+<li><p>Suspendisse id sem consectetuer libero luctus adipiscing.</p></li>
+</ol>
+
+
+<p>在正常段落的基础上用四个空格缩进或者1个Tab缩进可以产生代码标记:</p>
+
+<pre><code>这是一段代码.
+Markdown会把代码块里的代码直接格式化，见如下
+&lt;div class="footer"&gt;
+    &amp;copy; 2004 Foo Corporation
+&lt;/div&gt;
+</code></pre>
+
+<p>三个*表示hr标记</p>
+
+<hr />
+
+<p>带标题的<a href="http://www.sohu.com" title="搜狐">链接</a></p>
+
+<p>不带标题的<a href="http://www.sohu.com">链接</a></p>
+
+<p>这是本地链接<a href="/local/">链接</a></p>
+
+<p>这是锚 [链接][锚标记] 标记  is [an example][id] r</p>
+]]></content>
+  </entry>
+  
+</feed>

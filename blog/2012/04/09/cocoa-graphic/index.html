@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>cocoa_graphic - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="此篇文字用于记录学习阅读cocoa programming handbook所做的笔记! cocoa的图形系统使用的是PostScript drawing model.基本原理是基于Path(路径)结合线条，曲线来构成图形。文字是路径结合制定的字体来绘制。 注意：osx上绘图是由AppKit提供， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/04/09/cocoa-graphic">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Cocoa_graphic</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-09T11:05:00+08:00" pubdate data-updated="true">Apr 9<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>此篇文字用于记录学习阅读cocoa programming handbook所做的笔记!</p>
+
+<p>cocoa的图形系统使用的是PostScript drawing model.基本原理是基于Path(路径)结合线条，曲线来构成图形。文字是路径结合制定的字体来绘制。</p>
+
+<p>注意：osx上绘图是由AppKit提供，iPhone上由UIKit提供，不过他们都遵循同样的模型机制，UIkit提供API接口的是core　graphic，是基于C的，osx上的是object-c实现的。</p>
+
+<h2>上下文图形会话</h2>
+
+<p>任何时候要开始手工绘制图形，首先必须要做的是获得当前的上下文图形会话，它是表示当前会话状态的对象。图形会话表示当前状态下绘画窗口的相对坐标，前景色，背景色等等的信息。一个直接从PostScript drawing model继承下来的方法是会话状态保存，你可以保存当前的状态到堆栈以便稍后使用</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'>    <span class="c1">// AppKit:</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">NSGraphicsContext</span> <span class="n">saveGraphicsState</span><span class="p">];</span>
+</span><span class='line'>    <span class="c1">// drawing code...</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">NSGraphicsContext</span> <span class="n">restoreGraphicsState</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Quartz 2D:</span>
+</span><span class='line'>    <span class="err">￼￼</span><span class="n">CGContextSaveGState</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// drawing code...</span>
+</span><span class='line'>    <span class="n">CGContextRestoreGState</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面一段暂时是?，需要实验以后理解</p>
+
+<h2>Core Graphics</h2>
+
+<p>Quartz 2D,也可以叫Core Graphics,是最底层的绘图API,他们提供了C　API来做基于PDF的绘图操作。我们看看一段代码来学习,自定义一个view</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="err">￼</span>
+</span><span class='line'><span class="cp">  #import &quot;MouseTrackView.h&quot; </span>
+</span><span class='line'><span class="cp">  #include &lt;Quartz/Quartz.h&gt;</span>
+</span><span class='line'>  <span class="err">@</span><span class="n">implementation</span> <span class="n">MouseTrackView</span> <span class="o">-</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">awakeFromNib</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="n">new</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">//　cocoa view默认的绘图方法，一切绘图操作都应放在这里</span>
+</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span><span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// 如果没有point就直接返回</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">([</span><span class="n">points</span> <span class="n">count</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1">//　获得当前的图形上下文</span>
+</span><span class='line'>    <span class="n">NSGraphicsContext</span> <span class="o">*</span><span class="n">context</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSGraphicsContext</span> <span class="n">currentContext</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">CGContextRef</span> <span class="n">cgContext</span> <span class="o">=</span> <span class="p">[</span><span class="n">context</span> <span class="n">graphicsPort</span><span class="p">];</span>
+</span><span class='line'>    <span class="c1">// 设置线条的填充宽度</span>
+</span><span class='line'>    <span class="n">CGContextSetLineWidth</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="mf">2.0f</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// 设置线条的填充颜色</span>
+</span><span class='line'>    <span class="n">CGContextSetStrokeColorWithColor</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span><span class="n">CGColorGetConstantColor</span><span class="p">(</span><span class="n">kCGColorBlack</span><span class="p">));</span>
+</span><span class='line'>    <span class="c1">// 开始绘画路径，相当于准备开始移动画笔</span>
+</span><span class='line'>    <span class="n">CGContextBeginPath</span><span class="p">(</span><span class="n">cgContext</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// 获得起始坐标，转换NSPoint到CGPoint</span>
+</span><span class='line'>    <span class="n">CGPoint</span> <span class="n">firstPoint</span> <span class="o">=</span> <span class="n">NSPointToCGPoint</span><span class="p">([[</span><span class="n">points</span> <span class="nl">objectAtIndex:</span><span class="mi">0</span><span class="p">]</span><span class="err">　</span><span class="n">pointValue</span><span class="p">]);</span>
+</span><span class='line'>    <span class="c1">// 移动画笔到起始坐标</span>
+</span><span class='line'>    <span class="n">CGContextMoveToPoint</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="n">firstPoint</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">firstPoint</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// 绘制从其实坐标到坐标数组内的各个坐标的直线</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">NSValue</span> <span class="o">*</span><span class="n">point</span> <span class="k">in</span> <span class="n">points</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="n">CGPoint</span> <span class="n">pt</span> <span class="o">=</span> <span class="n">NSPointToCGPoint</span><span class="p">([</span><span class="n">point</span> <span class="n">pointValue</span><span class="p">]);</span>
+</span><span class='line'>      <span class="n">CGContextAddLineToPoint</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="n">pt</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pt</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 正式会话，把上面的操作在画布上画出来</span>
+</span><span class='line'>    <span class="n">CGContextDrawPath</span><span class="p">(</span><span class="n">cgContext</span><span class="p">,</span> <span class="n">kCGPathStroke</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">mouseDown:</span><span class="p">(</span><span class="n">NSEvent</span> <span class="o">*</span><span class="p">)</span><span class="n">theEvent</span><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// 获得点击后的坐标</span>
+</span><span class='line'>    <span class="n">NSPoint</span> <span class="n">click</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertPoint:</span><span class="p">[</span><span class="n">theEvent</span> <span class="n">locationInWindow</span><span class="p">]</span> <span class="nl">fromView:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>    <span class="c1">// 保持的坐标数组中</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">points</span> <span class="nl">addObject:</span><span class="p">[</span><span class="n">NSValue</span> <span class="nl">valueWithPoint:</span><span class="n">click</span><span class="p">]];</span>
+</span><span class='line'>    <span class="c1">// 重绘当前View</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">self</span> <span class="nl">setNeedsDisplay:</span><span class="n">YES</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">dealloc</span><span class="p">{</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">points</span> <span class="n">release</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">super</span> <span class="n">dealloc</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>AppKit Drawing</h2>
+
+<p>AppKit为我们提供了直接使用objectc来绘图的API。这样我们就可以在更高端的视角来做绘图操作。在这里，你不比直接和图形上下文打交道，如果设置线条颜色，使用AppKit我们可以用下面的方式来实现</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">blackColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Drawing Shapes</h2>
+
+<p>Cocoa里最重要的绘图函数末过与NSBezierPath，它封装了PostScript path，你可以保持坐标点然后在把画出来。它可以比Quartz共有效率。还是上面的例子，实际上我们绘制了太多遍，下面我们来看一个使用Appkit的实现</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">  #import &quot;MouseTrackView.h&quot;</span>
+</span><span class='line'>  <span class="k">@implementation</span> <span class="nc">MouseTrackView</span>
+</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span> <span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// path是一个NSBezierPath对象，实例变量</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">path</span> <span class="n">stroke</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">mouseDown:</span> <span class="p">(</span><span class="n">NSEvent</span><span class="o">*</span><span class="p">)</span><span class="n">theEvent</span><span class="p">{</span>
+</span><span class='line'>    <span class="c1">//获得点击坐标点</span>
+</span><span class='line'>    <span class="n">NSPoint</span> <span class="n">click</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertPoint:</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">locationInWindow</span><span class="p">]</span> <span class="nl">fromView:</span> <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>    <span class="c1">//　初始化NSBezierPath对象</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">nil</span> <span class="o">==</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">new</span><span class="p">];</span>
+</span><span class='line'>      <span class="c1">//把做标点移到点击点</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">path</span> <span class="nl">moveToPoint:</span> <span class="n">click</span><span class="p">];</span>
+</span><span class='line'>      <span class="c1">//把NSBezierPath对象的线条宽度设为2</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">path</span> <span class="nl">setLineWidth:</span> <span class="mi">2</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">// 绘制从初始点到点击点的线条</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">path</span> <span class="nl">lineToPoint:</span> <span class="n">click</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">self</span> <span class="nl">setNeedsDisplay:</span> <span class="n">YES</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">dealloc</span><span class="p">{</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">path</span> <span class="n">release</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">super</span> <span class="n">dealloc</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到目前为止，我们还只限于画线条，下面我们来看看怎么用NSBezierPath来画各式形状</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">#import &quot;BezierTrack.h&quot;</span>
+</span><span class='line'><span class="k">@implementation</span> <span class="nc">BezierTrack</span>
+</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">drawRect:</span> <span class="p">(</span><span class="n">NSRect</span><span class="p">)</span><span class="n">rect</span><span class="p">{</span>
+</span><span class='line'>  <span class="c1">// 初始化一个bezier路径</span>
+</span><span class='line'>  <span class="n">NSBezierPath</span> <span class="o">*</span><span class="n">control1</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">bezierPath</span><span class="p">];</span>
+</span><span class='line'>  <span class="c1">// 移到初始点</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="nl">moveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
+</span><span class='line'>  <span class="c1">// 画一条到目标点的直线</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="nl">lineToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]];</span>
+</span><span class='line'>  <span class="c1">// 设置线条颜色</span>
+</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">redColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
+</span><span class='line'>  <span class="c1">// 设置宽度</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="nl">setLineWidth:</span> <span class="mi">2</span><span class="p">];</span>
+</span><span class='line'>  <span class="c1">// 填充线条</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control1</span> <span class="n">stroke</span><span class="p">];</span>
+</span><span class='line'>  <span class="c1">// 初始化一个bezier路径,并绘制一条绿色的线条</span>
+</span><span class='line'>  <span class="n">NSBezierPath</span> <span class="o">*</span><span class="n">control2</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">bezierPath</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="nl">moveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">]];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="nl">lineToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">3</span><span class="p">]];</span>
+</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">greenColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="nl">setLineWidth:</span> <span class="mi">2</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">control2</span> <span class="n">stroke</span><span class="p">];</span>
+</span><span class='line'>  <span class="c1">// 绘制一个曲线，并填充线条与内部</span>
+</span><span class='line'>  <span class="n">NSBezierPath</span> <span class="o">*</span><span class="n">curve</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBezierPath</span> <span class="n">bezierPath</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="nl">moveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="nl">curveToPoint:</span> <span class="n">points</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</span><span class='line'>        <span class="nl">controlPoint1:</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span class='line'>        <span class="nl">controlPoint2:</span> <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">]];</span>
+</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">grayColor</span><span class="p">]</span> <span class="n">setFill</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[[</span><span class="n">NSColor</span> <span class="n">blackColor</span><span class="p">]</span> <span class="n">setStroke</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="n">fill</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">curve</span> <span class="n">stroke</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">mouseDown:</span> <span class="p">(</span><span class="n">NSEvent</span> <span class="o">*</span><span class="p">)</span><span class="n">theEvent</span><span class="p">{</span>
+</span><span class='line'>  <span class="n">NSPoint</span> <span class="n">click</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertPoint:</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">locationInWindow</span><span class="p">]</span> <span class="nl">fromView:</span> <span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>  <span class="c1">// 定义４个Point，依次设置click的值</span>
+</span><span class='line'>  <span class="n">points</span><span class="p">[</span><span class="n">pointCount</span><span class="o">++</span> <span class="o">%</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">click</span><span class="p">;</span>
+</span><span class='line'>  <span class="c1">// 如果４个点都设置好了就重绘</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">pointCount</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">self</span> <span class="nl">setNeedsDisplay:</span> <span class="n">YES</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-09T11:05:00+08:00" pubdate data-updated="true">Apr 9<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/03/23/arcbi-ji/" title="Previous Post: arc笔记">&laquo; arc笔记</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/04/10/cocoa-graphic-2/" title="next Post: Cocoa_graphic_2">Cocoa_graphic_2 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

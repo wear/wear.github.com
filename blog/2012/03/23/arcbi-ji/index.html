@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>arc笔记 - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="此篇文字为阅读　http://www.raywenderlich.com/　上关于ARC的指南文章的笔记 ARC(auto reference counting)是苹果在ios5,mac 10.7以后引入的一项内存管理的新技术。目标是要替代手工的内存计数机制，由手工变自动，减少代码量，提高编程效率 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/03/23/arcbi-ji">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Arc笔记</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-23T09:57:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>此篇文字为阅读　http://www.raywenderlich.com/　上关于ARC的指南文章的笔记</p>
+
+<p>ARC(auto reference counting)是苹果在ios5,mac 10.7以后引入的一项内存管理的新技术。目标是要替代手工的内存计数机制，由手工变自动，减少代码量，提高编程效率，减少出错率。它是苹果编译器的一项特性，在代码编译阶段自动插入原来由你手工执行的retain,release等的内存管理相关的代码，编译器会知道如何以及合适插入相关代码。</p>
+
+<p>学习ARC我们要知道的机制是，对象是否释放由指向它的指针来标志，一个对象如果由指向它的指南，它就维持，如果没有，它就被释放！这条规则对实例变量，局部变量，属性由成立.</p>
+
+<p>下面我们来看一个例子</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'>  <span class="n">NSString</span> <span class="o">*</span><span class="n">firstName</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">textField</span><span class="p">.</span><span class="n">text</span><span class="p">;</span>
+</span><span class='line'>  <span class="c1">// self.textField.text = @&quot;Rayn&quot;</span>
+</span><span class='line'>  
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这条语句让firstName成为了指向字符串&#8221;Rayn&#8221;的指针，&#8221;Rayn&#8221;还是一个指向它的指针是self.textField.text。如果用户修改了textField.text的值，比如@&#8221;Rayman&#8221;,textField.text开始保持新的值&#8221;Rayman&#8221;,这个时候&#8221;Rayn&#8221;还有一个指向它的指针firstName,所以它在维持在内存中。当firstName也被修改，或者firstName过了它的作用域的时候，也就是不在由指针指向&#8221;Rayn&#8221;，这个字符串对象就会被销毁。</p>
+
+<p>我们称FirstName和self.textField.text为(strong)强类型因为他们可以保持对象的,默认所有实例变量和局部变量都是强类型。还有一个类型是(weak)弱类型，此种类型的变量不保持对象，加入上面例子中FirstName是弱类型，当textField.title改变后,&#8221;Rayn&#8221;就会被销毁，因为不再任何指向它的对象。此时FirstName指向的是nil。</p>
+
+<p>弱类型只在一些特定的场合派用场。比如两个对象是父子关系，父对象会用一个强指针来维持子对象，子对象则用弱类型指针来建立对父对像的引用，一旦父对象被销毁，子对象也就销毁了，否则的话子对象也拥有父对象，他们就永远无法销毁了。</p>
+
+<p>有了ARC以后，在内存管理方面我们要思考的主要问题变成了“谁拥有什么？”，请看下面的例子</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> <span class="kt">id</span> <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">array</span> <span class="nl">objectAtIndex:</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">array</span> <span class="nl">removeObjectAtIndex:</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;%@&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="p">);</span>
+</span><span class='line'>  
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果是手工管理维持与释放，上面的代码会报错，因为在NSLog打印obj之前obj已经被销毁了。但是在ARC下会工作，因为[array objectAtIndex:0]对象的值除了数组拥有外obj也拥有它，所以虽然数组里的指针被销毁了，obj还是让它得以保持。</p>
+
+<p>ARC也有一些限制，其中之一是它只对Object-C对象起作用，对Core Foundation或者直接C写的malloc()和free()不起作用，你还是要手工管理。</p>
+
+<p>ARC替我们做了很多工作，但它不是真正意义上的垃圾处理机制，它还是计数管理，所以我们还是要明白的了解其中的运行机制，在特定时候要手动把变量值设为nil以释放，你不能完全依赖它。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-23T09:57:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ios/'>ios</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/02/19/ios-file-system-and-coredata/" title="Previous Post: IOS File System And CoreData">&laquo; IOS File System And CoreData</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/04/09/cocoa-graphic/" title="next Post: cocoa_graphic">cocoa_graphic &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

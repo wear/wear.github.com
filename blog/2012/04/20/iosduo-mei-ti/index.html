@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>IOS多媒体 - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="本篇文字用于记录学习IOS上的多媒体使用。 IOS上的多媒体使用有一些不同与OSX的地方，其中最重要的是IOS被设计成是单用户系统，在同一时间内用户的焦点只能有一个，所以你在播放多媒体的时候有可能会被打进来的电话打断，这个时候需要跳到通话界面，通话结束后能在被打断的地方继续播放。 播放本地音频 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/04/20/iosduo-mei-ti">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">IOS多媒体</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-20T09:43:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本篇文字用于记录学习IOS上的多媒体使用。</p>
+
+<p>IOS上的多媒体使用有一些不同与OSX的地方，其中最重要的是IOS被设计成是单用户系统，在同一时间内用户的焦点只能有一个，所以你在播放多媒体的时候有可能会被打进来的电话打断，这个时候需要跳到通话界面，通话结束后能在被打断的地方继续播放。</p>
+
+<h2>播放本地音频</h2>
+
+<p>播放本地音频需要如下步骤</p>
+
+<ol>
+<li>Set up an AV Foundation Audio Session (AVAudioSession).</li>
+<li>Set up an AV Foundation Audio Player (AVAudioPlayer).</li>
+<li>Handle any interruptions.</li>
+</ol>
+
+
+<h3>AV Foundation Audio Session</h3>
+
+<p>AV Foundation Audio Session管理你的IOS设备上的音频体验，通过设置不同的属性，你就可以为当前用户提供定制话的体验。比如你的应用需要播放背景音乐，如果用户在进入App的时候已经在播放音乐，比如他正在听Ipod，这时候你就可以选择是用背景音乐覆盖IPod的音乐还是继续播放IPod音乐。</p>
+
+<p>AV Foundation Audio Session是个单例类，意思是只有一个它的实例。当你获得了实例的应用之后，你的首要任务是设置它的代理与类别，代理决定如果相应中断，类别确定多个音频源时的操作。类别有两种主要区别，一种是可以后台播放的，新的音频会替换旧的。但是如果是Ambient类，Ambient会与当前音效混合，Solo Ambient会覆盖当前音效。</p>
+
+<p>下面的代码演示如何播放本地音频</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'><span class="c1">// Set up our sound effect</span>
+</span><span class='line'><span class="n">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">;</span>
+</span><span class='line'><span class="n">AVAudioPlayer</span> <span class="o">*</span><span class="n">soundEffect</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+</span><span class='line'><span class="n">soundEffect</span> <span class="o">=</span> <span class="p">[[</span><span class="n">AVAudioPlayer</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithContentsOfURL:</span><span class="n">soundURL</span> <span class="nl">error:</span><span class="o">&amp;</span><span class="n">error</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">soundEffect</span> <span class="nl">setDelegate:</span><span class="n">self</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">soundEffect</span> <span class="n">prepareToPlay</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// If we are ambient solo, set up background music</span>
+</span><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">category</span> <span class="o">=</span> <span class="p">[[</span><span class="n">AVAudioSession</span> <span class="n">sharedInstance</span><span class="p">]</span> <span class="n">category</span><span class="p">];</span>
+</span><span class='line'><span class="k">if</span><span class="p">([</span><span class="n">category</span> <span class="nl">isEqualToString:</span><span class="n">AVAudioSessionCategorySoloAmbient</span><span class="p">]){</span>
+</span><span class='line'><span class="n">AVAudioPlayer</span> <span class="o">*</span><span class="n">bgMusic</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+</span><span class='line'><span class="n">bgMusic</span> <span class="o">=</span> <span class="p">[[</span><span class="n">AVAudioPlayer</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithContentsOfURL:</span><span class="n">musicURL</span><span class="err">　</span><span class="nl">error:</span><span class="o">&amp;</span><span class="n">error</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">bgMusic</span> <span class="nl">setDelegate:</span><span class="n">self</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">bgMusic</span> <span class="n">prepareToPlay</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">bgMusic</span> <span class="n">play</span><span class="p">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-20T09:43:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/04/19/coreimage/" title="Previous Post: coreImage">&laquo; coreImage</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/05/15/what-is-mock-and-stub/" title="next Post: what is mock and stub?">what is mock and stub? &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

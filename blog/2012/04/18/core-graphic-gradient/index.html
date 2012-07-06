@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>core-graphic-gradient - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="本篇文字由于记录如何使用core graphic画渐变 我们先来看一个创建渐变的函数来学习如果创建渐变，函数来至　http://www.raywenderlich.com/ 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13 void drawLinearGradient( &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/04/18/core-graphic-gradient">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Core-graphic-gradient</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-18T09:33:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本篇文字由于记录如何使用core graphic画渐变</p>
+
+<p>我们先来看一个创建渐变的函数来学习如果创建渐变，函数来至　http://www.raywenderlich.com/</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    
+</span><span class='line'><span class="kt">void</span> <span class="nf">drawLinearGradient</span><span class="p">(</span><span class="n">CGContextRef</span> <span class="n">context</span><span class="p">,</span> <span class="n">CGRect</span> <span class="n">rect</span><span class="p">,</span> <span class="n">CGColorRef</span> <span class="n">startColor</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">CGColorRef</span>  <span class="n">endColor</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">CGColorSpaceRef</span> <span class="n">colorSpace</span> <span class="o">=</span> <span class="n">CGColorSpaceCreateDeviceRGB</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">CGFloat</span> <span class="n">locations</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSArray</span> <span class="n">arrayWithObjects</span><span class="o">:</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="n">startColor</span><span class="p">,</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="n">endColor</span><span class="p">,</span> <span class="n">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CGGradientRef</span> <span class="n">gradient</span> <span class="o">=</span> <span class="n">CGGradientCreateWithColors</span><span class="p">(</span><span class="n">colorSpace</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">(</span><span class="n">CFArrayRef</span><span class="p">)</span> <span class="n">colors</span><span class="p">,</span> <span class="n">locations</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// More coming... </span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建渐变需要指定colorSpace,colorSpace有很多的配置可做，大部分时候你需要做的只是制定一个设备相关的颜色信息就行了。在iphone上，都是用CGColorSpaceCreateDeviceRGB()。然后我们创建一个浮点数组用于记录每个颜色在渐变时候的位置，0.0表示是开始，1.0表示结束，locations[]有两个点，表示这个渐变用到了两个颜色，你可以创建多个颜色，然后为每个颜色制定一个位置。</p>
+
+<p>接下来我们创建了一个颜色数组，最后用我们制定的colorSpace,location,colors来创建渐变CGGradientCreateWithColors(colorSpace, (CFArrayRef) colors, locations);</p>
+
+<p>需要注意的是在创建渐变的时候我们需要把NSArray转换类型到CFArrayRef。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-18T09:33:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/04/11/core-graphic-ios-1/" title="Previous Post: core_graphic_ios_1">&laquo; core_graphic_ios_1</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/04/19/coreimage/" title="next Post: coreImage">coreImage &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/15/what-is-mock-and-stub/">what is mock and stub?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
