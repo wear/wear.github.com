@@ -4,7 +4,7 @@
   <title><![CDATA[Keep faith, Stay strong]]></title>
   <link href="http://wear.github.com/atom.xml" rel="self"/>
   <link href="http://wear.github.com/"/>
-  <updated>2012-07-06T17:36:50+08:00</updated>
+  <updated>2012-08-22T10:26:37+08:00</updated>
   <id>http://wear.github.com/</id>
   <author>
     <name><![CDATA[KongLingLiang]]></name>
@@ -12,6 +12,148 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ruby learing one]]></title>
+    <link href="http://wear.github.com/blog/2012/08/22/ruby-learing-one/"/>
+    <updated>2012-08-22T10:21:00+08:00</updated>
+    <id>http://wear.github.com/blog/2012/08/22/ruby-learing-one</id>
+    <content type="html"><![CDATA[<p> 数的因子就是所有可以整除这个数的数,但是不包括这个数自身。比如15的因子是1, 3, 5 。
+ 如果一个正整数如果正好等于它的所有因子之和，这个数就称为“完数”。
+ 例如，6的因子为1, 2, 3, 而6＝1＋2＋3，因此6是“完数”。请输出1000以内这样的完数</p>
+
+<p> 解法思路1
+ 遍历1000以内的数，每个数找出它们的因子，然后此数所有因子相加，看是不是与等于此数,如果是就保存下来</p>
+
+<p> 命令式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">wanshu?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">all_yingzi</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">all_yingzi</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">res</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">&lt;&lt;</span> <span class="n">num</span> <span class="k">if</span> <span class="n">n</span><span class="o">%</span><span class="n">num</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">res</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">total_wanshu</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">res</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.n</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">&lt;&lt;</span> <span class="n">num</span> <span class="k">if</span> <span class="n">wanshu?</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">||</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">res</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 函数式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">wanshu?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">all_yingzi</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">all_yingzi</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">product</span> <span class="k">if</span><span class="p">(</span><span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">product</span> <span class="o">&lt;&lt;</span> <span class="n">counter</span> <span class="k">if</span> <span class="n">n</span><span class="o">%</span><span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>   <span class="n">all_yingzi</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">total_wanshu</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">product</span> <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">n</span>
+</span><span class='line'>   <span class="n">product</span> <span class="o">&lt;&lt;</span> <span class="n">counter</span> <span class="k">if</span> <span class="p">(</span><span class="n">wanshu?</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">||</span> <span class="n">counter</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">total_wanshu</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 利用块的函数式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">wanshu?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">opration_number</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">){</span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">|</span> <span class="n">x</span><span class="o">%</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">}</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">opration_number</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">counter</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="o">&amp;</span><span class="n">opration</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">product</span> <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">n</span>
+</span><span class='line'>   <span class="n">product</span> <span class="o">&lt;&lt;</span> <span class="n">counter</span> <span class="k">if</span> <span class="k">yield</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">opration_number</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="o">&amp;</span><span class="n">opration</span><span class="p">)</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">total_wanshu</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">opration_number</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">){</span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">|</span> <span class="n">wanshu?</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">||</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">}</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看结果</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'> <span class="nb">puts</span> <span class="n">total_wanshu</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[tilepages for uiscrollview]]></title>

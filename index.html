@@ -9,7 +9,7 @@
   <meta name="author" content="KongLingLiang">
 
   
-  <meta name="description" content="为了更好的理解scrolleview里的tilepages技巧，我在这里写一些读代码心得。 tilepages技巧大家都见过，在tableview里就实现这一技巧。基本原理是在一个UIScrollView里添加另一个UIScrollView的子类。这另一个UIScrollView可以是图片等， &hellip;">
+  <meta name="description" content="数的因子就是所有可以整除这个数的数,但是不包括这个数自身。比如15的因子是1, 3, 5 。 如果一个正整数如果正好等于它的所有因子之和，这个数就称为“完数”。 例如，6的因子为1, 2, 3, 而6＝1＋2＋3，因此6是“完数”。请输出1000以内这样的完数 解法思路1 遍历1000以内的数， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,175 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/08/22/ruby-learing-one/">Ruby Learing One</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-22T10:21:00+08:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p> 数的因子就是所有可以整除这个数的数,但是不包括这个数自身。比如15的因子是1, 3, 5 。
+ 如果一个正整数如果正好等于它的所有因子之和，这个数就称为“完数”。
+ 例如，6的因子为1, 2, 3, 而6＝1＋2＋3，因此6是“完数”。请输出1000以内这样的完数</p>
+
+<p> 解法思路1
+ 遍历1000以内的数，每个数找出它们的因子，然后此数所有因子相加，看是不是与等于此数,如果是就保存下来</p>
+
+<p> 命令式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">wanshu?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">all_yingzi</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">all_yingzi</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">res</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">&lt;&lt;</span> <span class="n">num</span> <span class="k">if</span> <span class="n">n</span><span class="o">%</span><span class="n">num</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">res</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">total_wanshu</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">res</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.n</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">&lt;&lt;</span> <span class="n">num</span> <span class="k">if</span> <span class="n">wanshu?</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">||</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">res</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 函数式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">wanshu?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">all_yingzi</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">all_yingzi</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">product</span> <span class="k">if</span><span class="p">(</span><span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">product</span> <span class="o">&lt;&lt;</span> <span class="n">counter</span> <span class="k">if</span> <span class="n">n</span><span class="o">%</span><span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>   <span class="n">all_yingzi</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">total_wanshu</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">product</span> <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">n</span>
+</span><span class='line'>   <span class="n">product</span> <span class="o">&lt;&lt;</span> <span class="n">counter</span> <span class="k">if</span> <span class="p">(</span><span class="n">wanshu?</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">||</span> <span class="n">counter</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">total_wanshu</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 利用块的函数式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">wanshu?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">opration_number</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">){</span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">|</span> <span class="n">x</span><span class="o">%</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">}</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">opration_number</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">counter</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="o">&amp;</span><span class="n">opration</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">product</span> <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">n</span>
+</span><span class='line'>   <span class="n">product</span> <span class="o">&lt;&lt;</span> <span class="n">counter</span> <span class="k">if</span> <span class="k">yield</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">counter</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">opration_number</span><span class="p">(</span><span class="n">product</span><span class="p">,</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="o">&amp;</span><span class="n">opration</span><span class="p">)</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">total_wanshu</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">opration_number</span><span class="p">(</span><span class="o">[]</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">){</span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">|</span> <span class="n">wanshu?</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">||</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">}</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看结果</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>
+</span><span class='line'> <span class="nb">puts</span> <span class="n">total_wanshu</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1880,166 +2049,6 @@ Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/11/core-graphic-ios-1/">Core_graphic_ios_1</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-11T15:06:00+08:00" pubdate data-updated="true">Apr 11<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我们继续学习core graphic,我最终的目标是ios开发，所以从现在开始，我将只关注ios上的表现。</p>
-
-<p>Core Graphics是除UIKit,foundatin之外最重要的库，因为UIKit依赖于Core Graphics，所以一般新建的IOS  项目都已经导入了Core Graphics库。在任何需要用到 Core Graphics的地方，用</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">    </span>
-</span><span class='line'><span class="cp">#import &lt;CoreGraphics/CoreGraphics.h&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>把它导进入，如果已经import了UIKit，就需要上面这句话了。</p>
-
-<p>Quartz是mac osx和ios用于界面描绘的底层API,它包含两部分Quartz2D（二维界面渲染）和Quartz Core（核心动画的库），CoreGraphics库已经包含了Quartz2D.</p>
-
-<h2>drawInG CuStOm uIVIewS</h2>
-
-<p>核心图形的几何坐标系统原点(origin(0,0))设在左上角，在这个坐标系统中，x轴坐标代表右移，y轴坐标代表下移。使用核心动画时，我们应该用点(points)来思考而不是用像素，因为像素会因为设备分辨率的不同而有所变化。比如，在iphone4的retain屏幕，和iphone3一样的屏幕大小，分辨率由480x320变成了960x640，他们的坐标系统仍然保持480x320不变。</p>
-
-<p>Core Graphics工作在graphics context内，graphics context像一块画图，是你绘图操作的目标。在UIiew的drawrect內，ios会自动为你准备好graphics context，你需要做的就是用　UIGraphicsGetCurrentContext()　来获得当前的graphics context。
-你在graphics context做的动作是顺序的，新的操作会基于上一次的操作。Core Graphics最常见的操作是重写UIView的drawrect方法，当ios需要重绘View时，它就会调用drawrect。这就表示这个方法会被频繁的调用，尤其在动画/缩放等操作的时候，所以这个方法必须尽量轻，作为开发者，你永远不应该自己调用这个方法，也不该在这里alloc或release对象。</p>
-
-<p>当你需要重绘视图时，你可以用视图的setNeedsDisplay方法，它会告诉ios在合适的时候把这个视图重绘。</p>
-
-<p>当你新建UIView的子类时，你会得到一个全空的graphics context，graphics context有很多的属性，就像其他的IOS对象一样。不像UIVIew，graphics context的属性时状态导向，意思是绘画动作都依赖于当前的属性。</p>
-
-<p>当你使用graphics context绘画时，你会遇到如下的属性</p>
-
-<ul>
-<li>Path</li>
-<li>Stroke</li>
-<li>Line</li>
-<li>Width</li>
-<li>Fill Color</li>
-<li>Line Dash</li>
-<li>Shadow</li>
-<li>Clip Path</li>
-<li>Blend Mode</li>
-<li>Current Transform Matrix</li>
-</ul>
-
-
-<p>为了演示这些状态导向的属性时如何工作的，我们尝试一个简单的例子，在屏幕上画字</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
-</span><span class='line'><span class="n">CGContextSetShadow</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">2</span><span class="p">);</span>
-</span><span class='line'><span class="p">[</span><span class="err">@”</span><span class="n">Hello</span><span class="p">,</span> <span class="n">Core</span> <span class="n">Graphics</span><span class="err">”</span> <span class="nl">drawAtPoint:</span><span class="n">firstPoint</span>
-</span><span class='line'>                                <span class="nl">withFont:</span><span class="n">myFont</span><span class="p">];</span>
-</span><span class='line'><span class="n">CGContextSetShadow</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="mi">2</span><span class="p">);</span>
-</span><span class='line'><span class="p">[</span><span class="err">@”</span><span class="n">Hello</span><span class="p">,</span> <span class="n">Core</span> <span class="n">Graphics</span><span class="err">”</span> <span class="nl">drawAtPoint:</span><span class="n">secondPoint</span> <span class="nl">withFont:</span><span class="n">myFont</span><span class="p">];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在上面这个例子中，第一个文字的阴影第二个文字的阴影不同，但他们用的都是graphics context的shadow属性。</p>
-
-<h2>Graphic Context Stack</h2>
-
-<p>另Core Graphic一个核心特性是graphics context堆栈，我们还是用画家和画布做类比，一个graphics context相当于一个平的画布，绘画动作在单独层上进行，它不允许你把内容分布到不同的层上。graphics context堆栈允许你保持当前的graphics context状态，当特定的动作发生后在还原回来。这对要求特定的状态或者或者临时记住当前动作的复杂绘画尤其有用。你可以在drawrect里嵌套多个保持和还原操作，而且你必须要还原graphics context。</p>
-
-<p>下面的代码演示了一系列的绘画动作，注意使用了保存context state和不保持context state导致结果的差别</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
-</span><span class='line'><span class="c1">//Draw rounded rect with shadow</span>
-</span><span class='line'><span class="n">CGRect</span> <span class="n">myRect</span> <span class="o">=</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
-</span><span class='line'><span class="n">UIBezierPath</span> <span class="o">*</span><span class="n">rr</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIBezierPath</span> <span class="nl">bezierPathWithRoundedRect:</span><span class="n">myRect</span> <span class="nl">cornerRadius:</span><span class="mi">30</span><span class="p">];</span>
-</span><span class='line'><span class="n">CGContextSetShadow</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">10</span><span class="p">);</span>
-</span><span class='line'><span class="p">[</span><span class="n">rr</span> <span class="n">fill</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//Save the current state</span>
-</span><span class='line'><span class="n">CGContextSaveGState</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
-</span><span class='line'><span class="c1">//Clip the context to the rounded rect path</span>
-</span><span class='line'><span class="p">[</span><span class="n">rr</span> <span class="n">addClip</span><span class="p">];</span>
-</span><span class='line'><span class="c1">//Draw a gradient,</span>
-</span><span class='line'><span class="c1">//this will be limited to the area of the clipping path</span>
-</span><span class='line'><span class="n">CGContextDrawLinearGradient</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="p">[</span><span class="n">self</span> <span class="n">gradient</span><span class="p">],</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-</span><span class='line'><span class="c1">//Restore the context state</span>
-</span><span class='line'><span class="c1">// This restores the context to before our clipping mask was added</span>
-</span><span class='line'><span class="n">CGContextRestoreGState</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//Draw Text</span>
-</span><span class='line'><span class="n">CGContextSetRGBFillColor</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="p">[</span><span class="err">@”</span><span class="n">iOS</span> <span class="mi">5</span> <span class="n">Core</span> <span class="n">Frameworks</span><span class="err">”</span> <span class="nl">drawInRect:</span><span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">320</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span> <span class="nl">withFont:</span><span class="n">myFont</span>
-</span><span class='line'>                        <span class="nl">lineBreakMode:</span><span class="n">UILineBreakModeClip</span>
-</span><span class='line'>                               <span class="nl">alignment:</span><span class="n">UITextAlignmentCenter</span><span class="p">];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>我们先画可一个矩形，然后保存当前的context state,然后剪切这个矩形，对这个矩形添加线型渐变，最后把context state回复回来，最后写文字。如果在剪切前不保存状态，最后的文字会被限制在矩形内，因为context已经被clip了。</p>
-
-<p>当你和Core Graphics打交道的时候，大部分的时间你都会碰到paths, gradients, text,和images。所以下面就重点讲这四项!</p>
-
-<h3>PATH</h3>
-
-<p>path是最简单的绘画方式，就像小时候玩的游戏，在两点之间连线一样，path就是在多个点之间用直线或者Bezier曲线连接。有很多方法使用路径，其中最简单的方法是用UIBezierPath对象.</p>
-
-<p>UIBezierPath用来定义几何路径，就像你之前看到的一样，当你定义了路径以后，你就可以对笔画和内容上色，或者检测点击时间，剪切当前路径。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2055,6 +2064,10 @@ Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2012/08/22/ruby-learing-one/">ruby learing one</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/06/18/tilepages-for-uiscrollview/">tilepages for uiscrollview</a>
       </li>
     
@@ -2068,10 +2081,6 @@ Newsstanded Kit提供了一系列的方法让你可以排序和管理你的内�
     
       <li class="post">
         <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/06/04/newsstanded-app/">newsstanded app</a>
       </li>
     
   </ul>
