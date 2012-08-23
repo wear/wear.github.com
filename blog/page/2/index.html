@@ -9,7 +9,19 @@
   <meta name="author" content="KongLingLiang">
 
   
-  <meta name="description" content="我们继续学习core graphic,我最终的目标是ios开发，所以从现在开始，我将只关注ios上的表现。 Core Graphics是除UIKit,foundatin之外最重要的库，因为UIKit依赖于Core Graphics，所以一般新建的IOS 项目都已经导入了Core Graphics库 &hellip;">
+  <meta name="description" content="本篇文字由于记录如何使用core graphic画渐变 我们先来看一个创建渐变的函数来学习如果创建渐变，函数来至　http://www.raywenderlich.com/ 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13 void drawLinearGradient( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +76,79 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/18/core-graphic-gradient/">Core-graphic-gradient</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-18T09:33:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文字由于记录如何使用core graphic画渐变</p>
+
+<p>我们先来看一个创建渐变的函数来学习如果创建渐变，函数来至　http://www.raywenderlich.com/</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    
+</span><span class='line'><span class="kt">void</span> <span class="nf">drawLinearGradient</span><span class="p">(</span><span class="n">CGContextRef</span> <span class="n">context</span><span class="p">,</span> <span class="n">CGRect</span> <span class="n">rect</span><span class="p">,</span> <span class="n">CGColorRef</span> <span class="n">startColor</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">CGColorRef</span>  <span class="n">endColor</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">CGColorSpaceRef</span> <span class="n">colorSpace</span> <span class="o">=</span> <span class="n">CGColorSpaceCreateDeviceRGB</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">CGFloat</span> <span class="n">locations</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">NSArray</span> <span class="o">*</span><span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSArray</span> <span class="n">arrayWithObjects</span><span class="o">:</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="n">startColor</span><span class="p">,</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="n">endColor</span><span class="p">,</span> <span class="n">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">CGGradientRef</span> <span class="n">gradient</span> <span class="o">=</span> <span class="n">CGGradientCreateWithColors</span><span class="p">(</span><span class="n">colorSpace</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">(</span><span class="n">CFArrayRef</span><span class="p">)</span> <span class="n">colors</span><span class="p">,</span> <span class="n">locations</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// More coming... </span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建渐变需要指定colorSpace,colorSpace有很多的配置可做，大部分时候你需要做的只是制定一个设备相关的颜色信息就行了。在iphone上，都是用CGColorSpaceCreateDeviceRGB()。然后我们创建一个浮点数组用于记录每个颜色在渐变时候的位置，0.0表示是开始，1.0表示结束，locations[]有两个点，表示这个渐变用到了两个颜色，你可以创建多个颜色，然后为每个颜色制定一个位置。</p>
+
+<p>接下来我们创建了一个颜色数组，最后用我们制定的colorSpace,location,colors来创建渐变CGGradientCreateWithColors(colorSpace, (CFArrayRef) colors, locations);</p>
+
+<p>需要注意的是在创建渐变的时候我们需要把NSArray转换类型到CFArrayRef。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1513,6 +1598,10 @@ Markdown会把代码块里的代码直接格式化，见如下
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2012/08/23/sicplian-xi-1/">sicp练习1</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/08/22/ruby-learing-one/">ruby learing one</a>
       </li>
     
@@ -1526,10 +1615,6 @@ Markdown会把代码块里的代码直接格式化，见如下
     
       <li class="post">
         <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/06/05/ios-coretext/">ios coretext</a>
       </li>
     
   </ul>

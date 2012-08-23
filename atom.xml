@@ -4,7 +4,7 @@
   <title><![CDATA[Keep faith, Stay strong]]></title>
   <link href="http://wear.github.com/atom.xml" rel="self"/>
   <link href="http://wear.github.com/"/>
-  <updated>2012-08-22T10:26:37+08:00</updated>
+  <updated>2012-08-23T17:50:37+08:00</updated>
   <id>http://wear.github.com/</id>
   <author>
     <name><![CDATA[KongLingLiang]]></name>
@@ -12,6 +12,351 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[sicp练习1]]></title>
+    <link href="http://wear.github.com/blog/2012/08/23/sicplian-xi-1/"/>
+    <updated>2012-08-23T09:54:00+08:00</updated>
+    <id>http://wear.github.com/blog/2012/08/23/sicplian-xi-1</id>
+    <content type="html"><![CDATA[<h3>练习1.1</h3>
+
+<p>求表达式的值</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">10</span>
+</span><span class='line'><span class="c1">#10</span>
+</span><span class='line'><span class="p">(</span><span class="o">+</span> <span class="mi">5</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#12</span>
+</span><span class='line'><span class="p">(</span><span class="o">-</span> <span class="mi">9</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#8</span>
+</span><span class='line'><span class="p">(</span><span class="sr">/ 6 2) </span>
+</span><span class='line'><span class="sr">#3</span>
+</span><span class='line'><span class="sr">(+ (* 2 4) (- 4 6)) </span>
+</span><span class='line'><span class="sr">#10</span>
+</span><span class='line'><span class="sr">(define a 3)</span>
+</span><span class='line'><span class="sr">(define b (+ a 1))</span>
+</span><span class='line'><span class="sr">(+ a b (* a b)) #=(+ a b 4a)=(+ 5a b)=19</span>
+</span><span class='line'><span class="sr">(= a b) </span>
+</span><span class='line'><span class="sr">#f</span>
+</span><span class='line'><span class="sr">(if (and (&gt; b a) (&lt; b (* a b)))</span>
+</span><span class='line'><span class="sr">  b</span>
+</span><span class='line'><span class="sr">  a) </span>
+</span><span class='line'><span class="sr">#4</span>
+</span><span class='line'><span class="sr">(cond ((= a 4) 6)</span>
+</span><span class='line'><span class="sr">      ((= b 4) (+ 6 7 a))</span>
+</span><span class='line'><span class="sr">      (else 25)) </span>
+</span><span class='line'><span class="sr">#16</span>
+</span><span class='line'><span class="sr">(+ 2 (if (&gt; b a) b a))</span>
+</span><span class='line'><span class="sr">#6</span>
+</span><span class='line'><span class="sr">(* (cond ((&gt; a b) a)</span>
+</span><span class='line'><span class="sr">         ((&lt; a b) b)</span>
+</span><span class='line'><span class="sr">         (else -1))</span>
+</span><span class='line'><span class="sr">  (+ a 1)) </span>
+</span><span class='line'><span class="sr">#16</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>练习1.2</h3>
+
+<p>转化位前缀形式</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="sr">/ (+ 5 4 (- 2 (- 3 (+ 6 (/</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)))))</span> <span class="p">(</span><span class="o">*</span> <span class="mi">3</span> <span class="p">(</span><span class="o">-</span> <span class="mi">6</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="o">-</span> <span class="mi">2</span> <span class="mi">7</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>练习1.3</h3>
+
+<p>定义一个过程，它以三个数为参数，返回其中较大两个之和</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">bigMax</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">cond</span> <span class="p">((</span><span class="ow">and</span> <span class="p">(</span><span class="o">&lt;</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="p">(</span><span class="o">&lt;</span> <span class="n">a</span> <span class="n">c</span><span class="p">))</span> <span class="p">(</span><span class="o">+</span> <span class="n">b</span> <span class="n">c</span><span class="p">))</span>
+</span><span class='line'>        <span class="p">((</span><span class="ow">and</span> <span class="p">(</span><span class="o">&lt;</span> <span class="n">b</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="o">&lt;</span> <span class="n">b</span> <span class="n">c</span><span class="p">))</span> <span class="p">(</span><span class="o">+</span> <span class="n">a</span> <span class="n">c</span><span class="p">))</span>
+</span><span class='line'>        <span class="p">(</span><span class="k">else</span> <span class="p">(</span><span class="o">+</span> <span class="n">a</span> <span class="n">b</span><span class="p">))</span>
+</span><span class='line'><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>练习1.4</h3>
+
+<p>说明过程的行为</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">plus</span><span class="o">-</span><span class="n">abs</span><span class="o">-</span><span class="n">b</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="p">((</span><span class="k">if</span> <span class="p">(</span><span class="o">&gt;</span> <span class="n">b</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="o">-</span><span class="p">)</span> <span class="n">a</span> <span class="n">b</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用两个数作为参数，如果第二个参数大于0,就对两个数相加，否则就相减</p>
+
+<h3>练习1.5</h3>
+
+<p>如果是正则序，则会求出0,因为(p)只是代换进函数，并未立即求值。随后执行时先检查了x是否等于0，这里刚好是0，所以就直接返回0了
+如果式应用序，则在参数传递阶段就先对参数求职，(p)是一个死循环，所以会一直死循环下去。</p>
+
+<h3>练习1.6</h3>
+
+<p>Scheme解释器使用应用序求值的，所以新定义的程序会陷入死循环，因为要对参数求值，会一直(improve guess x)下去</p>
+
+<h3>练习1.7</h3>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">sqrt</span><span class="o">-</span><span class="n">iter</span> <span class="n">origin</span><span class="o">-</span><span class="n">guess</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="n">good</span><span class="o">-</span><span class="n">enough?</span> <span class="n">origin</span><span class="o">-</span><span class="n">guess</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">guess</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">sqrt</span><span class="o">-</span><span class="n">iter</span> <span class="n">guess</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">improve</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>                 <span class="n">x</span><span class="p">)))</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">improve</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">average</span> <span class="n">guess</span> <span class="p">(</span><span class="sr">/ x guess)))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">(define (average x y)</span>
+</span><span class='line'><span class="sr">  (/</span> <span class="p">(</span><span class="o">+</span> <span class="n">x</span> <span class="n">y</span><span class="p">)</span> <span class="mi">2</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">good</span><span class="o">-</span><span class="n">enough?</span> <span class="n">origin</span><span class="o">-</span><span class="n">guess</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="o">&lt;</span> <span class="p">(</span><span class="sr">/ (abs (- origin-guess guess)) guess) 0.001))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">(define (square x)</span>
+</span><span class='line'><span class="sr">  (* x x))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">(define (sqrtd x)</span>
+</span><span class='line'><span class="sr">  (sqrt-iter  x 1.0 x))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">(sqrtd 0.000001)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要理解数字太大或太小下的情况</p>
+
+<h3>练习1.8</h3>
+
+<p>更好的求立方根的过程</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">sqrt</span><span class="o">-</span><span class="n">iter</span> <span class="n">origin</span><span class="o">-</span><span class="n">guess</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="n">good</span><span class="o">-</span><span class="n">enough?</span> <span class="n">origin</span><span class="o">-</span><span class="n">guess</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">guess</span>
+</span><span class='line'>        <span class="p">(</span><span class="n">sqrt</span><span class="o">-</span><span class="n">iter</span> <span class="n">guess</span>
+</span><span class='line'>         <span class="p">(</span><span class="n">improve</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>                   <span class="n">x</span><span class="p">)))</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">improve</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="sr">/ (+ (/</span> <span class="n">x</span> <span class="p">(</span><span class="n">square</span> <span class="n">guess</span><span class="p">))</span> <span class="p">(</span><span class="o">*</span> <span class="mi">2</span> <span class="n">guess</span><span class="p">))</span> <span class="mi">3</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">good</span><span class="o">-</span><span class="n">enough?</span> <span class="n">origin</span><span class="o">-</span><span class="n">guess</span> <span class="n">guess</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="o">&lt;</span> <span class="p">(</span><span class="sr">/ (abs (- origin-guess guess)) guess) 0.001))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  (define (square x)</span>
+</span><span class='line'><span class="sr">    (* x x))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  (define (sqrtd x)</span>
+</span><span class='line'><span class="sr">    (sqrt-iter  x 1.0 x))</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  (sqrtd 10)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>练习1.9</h3>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="o">+</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">a</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">b</span>
+</span><span class='line'>    <span class="p">(</span><span class="n">inc</span> <span class="p">(</span><span class="o">+</span> <span class="p">(</span><span class="n">dec</span> <span class="n">a</span><span class="p">)</span> <span class="n">b</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对上面过程求值(+ 4 5)
+(inc (+ 3 5))
+(inc (inc (+ 2 5)))
+(inc (inc (inc (+ 1 5))))
+(inc (inc (inc (inc (+ 0 5)))))
+(inc (inc (inc (inc 5))))
+(inc (inc (inc 6)))
+(inc (inc 7))
+(inc 8)
+9</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="o">+</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">a</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">b</span>
+</span><span class='line'>    <span class="p">(</span><span class="o">+</span> <span class="p">(</span><span class="n">dec</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="n">inc</span> <span class="n">b</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对上面过程求值(+ 4 5)
+(+ 3 6)
+(+ 2 7)
+(+ 1 8)
+(+ 0 9)
+9</p>
+
+<h3>练习1.10</h3>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">A</span> <span class="n">x</span> <span class="n">y</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">cond</span> <span class="p">((</span><span class="o">=</span> <span class="n">y</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">((</span><span class="o">=</span> <span class="n">x</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span> <span class="mi">2</span> <span class="n">y</span><span class="p">))</span>
+</span><span class='line'>        <span class="p">((</span><span class="o">=</span> <span class="n">y</span> <span class="mi">1</span><span class="p">)</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">(</span><span class="k">else</span> <span class="p">(</span><span class="n">A</span> <span class="p">(</span><span class="o">-</span> <span class="n">x</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>                 <span class="p">(</span><span class="n">A</span> <span class="n">x</span> <span class="p">(</span><span class="o">-</span> <span class="n">y</span> <span class="mi">1</span><span class="p">))))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>执行上面的过程</p>
+
+<ul>
+<li>(A 1 10)</li>
+<li>(A 0 (A 1 9))</li>
+<li>(A 0 (A 0 (A 1 8)))</li>
+<li>&#8230;(A 0 (A 1 1))</li>
+<li><p>=2<sup>10=1024</sup></p></li>
+<li><p>(A 2 4)</p></li>
+<li>(A 1 (A 2 3))</li>
+<li>(A 1 (A 1 (A 2 2)))</li>
+<li>(A 1 (A 1 (A 1 (A 2 1))))</li>
+<li>(A 1 (A 1 (A 1 2)))</li>
+<li>(A 1 (A 1 (A 0 (A 1 1))))</li>
+<li>(A 1 (A 1 (A 0 2)))</li>
+<li>(A 1 (A 1 4))</li>
+<li>(A 1 (A 0 (A 1 3)))</li>
+<li>(A 1 (A 0 (A 0 (A 1 2))))</li>
+<li>(A 1 (A 0 (A 0 (A 0 (A 1 1)))))</li>
+<li>(A 1 (A 0 (A 0 (A 0 2))))</li>
+<li>(A 1 (A 0 (A 0 4)))</li>
+<li>(A 1 (A 0 8))</li>
+<li>(A 1 16)</li>
+<li>=2<sup>16=65536</sup></li>
+</ul>
+
+
+<p>所以执行</p>
+
+<ul>
+<li>(A 3 3)</li>
+<li>(A 2 (A 3 2))</li>
+<li>(A 2 (A 2 (A 3 1)))</li>
+<li>(A 2 (A 2 2))</li>
+<li>(A 2 (A 1 (A 2 1)))</li>
+<li>(A 2 (A 1 2)</li>
+<li>(A 2 (A 0 (A 1 1)))</li>
+<li>(A 2 (A 0 2))</li>
+<li>(A 2 4)</li>
+<li>=216=65536</li>
+</ul>
+
+
+<p>需要加深对此数学函数的理解</p>
+
+<h3>练习1.11</h3>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#递归</span>
+</span><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">step</span> <span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">&lt;=</span> <span class="n">n</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">n</span>
+</span><span class='line'>      <span class="p">(</span><span class="o">+</span> <span class="p">(</span><span class="n">step</span> <span class="p">(</span><span class="o">-</span> <span class="n">n</span> <span class="mi">1</span><span class="p">))</span> <span class="p">(</span><span class="o">*</span> <span class="mi">2</span> <span class="p">(</span><span class="n">step</span> <span class="p">(</span><span class="o">-</span> <span class="n">n</span> <span class="mi">2</span><span class="p">)))</span> <span class="p">(</span><span class="o">*</span> <span class="mi">3</span> <span class="p">(</span><span class="n">step</span> <span class="p">(</span><span class="o">-</span> <span class="n">n</span> <span class="mi">3</span><span class="p">))))))</span>
+</span><span class='line'><span class="c1">#迭代</span>
+</span><span class='line'><span class="n">skip</span> <span class="k">for</span> <span class="n">now</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ruby learing one]]></title>
