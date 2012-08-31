@@ -9,19 +9,7 @@
   <meta name="author" content="KongLingLiang">
 
   
-  <meta name="description" content="本篇文字由于记录如何使用core graphic画渐变 我们先来看一个创建渐变的函数来学习如果创建渐变，函数来至　http://www.raywenderlich.com/ 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13 void drawLinearGradient( &hellip;">
+  <meta name="description" content="到底什么是mock和stub? 学习测试一直很困扰，今天来做一个彻底解决！ mock和stub都是测试的方法，用于伪装，方法存根(stub)等，目的在于独立测试不同的接口。比如对测试调用外部接口的方法，用mocks虚拟返回值，直接测试返回值对方法的影响，从而避免需要依赖访问外部的接口。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +64,651 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/05/15/what-is-mock-and-stub/">What Is Mock and Stub?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-15T11:35:00+08:00" pubdate data-updated="true">May 15<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>到底什么是mock和stub?</p>
+
+<p>学习测试一直很困扰，今天来做一个彻底解决！</p>
+
+<p>mock和stub都是测试的方法，用于伪装，方法存根(stub)等，目的在于独立测试不同的接口。比如对测试调用外部接口的方法，用mocks虚拟返回值，直接测试返回值对方法的影响，从而避免需要依赖访问外部的接口。</p>
+
+<p>mock和stub都可以用于模拟对象并预定义特定值，他们的区别是mock可以测试期望的方法回调，
+<a href="http://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing">stackoverflow对它们区别的讨论</a></p>
+
+<p>下面我们来看怎么用</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> 
+</span><span class='line'><span class="k">class</span> <span class="nc">Order</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:shipped_on</span><span class="sr"></span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  // 订单总费用</span>
+</span><span class='line'><span class="sr">  def total_cost</span>
+</span><span class='line'><span class="sr">    line_items.inject(0) { |total, line_item| total + line_item.price } + shipping_cost</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  /</span><span class="o">/</span> <span class="err">订单总重量</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">total_weight</span>
+</span><span class='line'>    <span class="n">line_items</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">total</span><span class="p">,</span> <span class="n">line_item</span><span class="o">|</span> <span class="n">total</span> <span class="o">+</span> <span class="n">line_item</span><span class="o">.</span><span class="n">weight</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span><span class="sr"></span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  // 订单运输费</span>
+</span><span class='line'><span class="sr">  def shipping_cost</span>
+</span><span class='line'><span class="sr">    total_weight * 5 + 10</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  class &lt;&lt; self</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">     /</span><span class="o">/</span> <span class="err">所有订单</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">find_all</span>
+</span><span class='line'>      <span class="c1"># Database.connection.execute(&#39;select * from orders...</span>
+</span><span class='line'>    <span class="k">end</span><span class="sr"></span>
+</span><span class='line'><span class="sr">  </span>
+</span><span class='line'><span class="sr">     // 某天开始送的</span>
+</span><span class='line'><span class="sr">    def number_shipped_since(date)</span>
+</span><span class='line'><span class="sr">      find_all.select { |order| order.shipped_on &gt; date }.length</span>
+</span><span class='line'><span class="sr">    end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">    /</span><span class="o">/</span> <span class="err">未送的总费用</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">unshipped_value</span>
+</span><span class='line'>      <span class="n">find_all</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">total</span><span class="p">,</span> <span class="n">order</span><span class="o">|</span> <span class="n">order</span><span class="o">.</span><span class="n">shipped_on</span> <span class="p">?</span> <span class="n">total</span> <span class="p">:</span> <span class="n">total</span> <span class="o">+</span> <span class="n">order</span><span class="o">.</span><span class="n">total_cost</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;test/unit&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mocha&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">OrderTest</span> <span class="o">&lt;</span> <span class="no">Test</span><span class="o">::</span><span class="no">Unit</span><span class="o">::</span><span class="no">TestCase</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># illustrates stubbing instance method</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">test_should_calculate_shipping_cost_based_on_total_weight</span>
+</span><span class='line'>    <span class="n">order</span> <span class="o">=</span> <span class="no">Order</span><span class="o">.</span><span class="n">new</span><span class="sr"></span>
+</span><span class='line'><span class="sr">    // 给这个对象塞上total_weight并预定返回10</span>
+</span><span class='line'><span class="sr">    order.stubs(:total_weight).returns(10)</span>
+</span><span class='line'><span class="sr">    assert_equal 60, order.shipping_cost</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  # illustrates stubbing class method</span>
+</span><span class='line'><span class="sr">  def test_should_count_number_of_orders_shipped_after_specified_date</span>
+</span><span class='line'><span class="sr">    now = Time.now; week_in_secs = 7 * 24 * 60 * 60</span>
+</span><span class='line'><span class="sr">    order_1 = Order.new; order_1.shipped_on = now - 1 * week_in_secs</span>
+</span><span class='line'><span class="sr">    order_2 = Order.new; order_2.shipped_on = now - 3 * week_in_secs</span>
+</span><span class='line'><span class="sr">    Order.stubs(:find_all).returns([order_1, order_2])</span>
+</span><span class='line'><span class="sr">    assert_equal 1, Order.number_shipped_since(now - 2 * week_in_secs)</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  # illustrates stubbing instance method for all instances of a class</span>
+</span><span class='line'><span class="sr">  def test_should_calculate_value_of_unshipped_orders</span>
+</span><span class='line'><span class="sr">    Order.stubs(:find_all).returns([Order.new, Order.new, Order.new])</span>
+</span><span class='line'><span class="sr">    Order.any_instance.stubs(:shipped_on).returns(nil)</span>
+</span><span class='line'><span class="sr">    Order.any_instance.stubs(:total_cost).returns(10)</span>
+</span><span class='line'><span class="sr">    assert_equal 30, Order.unshipped_value</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">/</span><span class="o">/</span> <span class="n">mocka</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Enterprise</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">dilithium</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@dilithium</span> <span class="o">=</span> <span class="n">dilithium</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">go</span><span class="p">(</span><span class="n">warp_factor</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">warp_factor</span><span class="o">.</span><span class="n">times</span> <span class="p">{</span> <span class="vi">@dilithium</span><span class="o">.</span><span class="n">nuke</span><span class="p">(</span><span class="ss">:anti_matter</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;test/unit&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mocha&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">EnterpriseTest</span> <span class="o">&lt;</span> <span class="no">Test</span><span class="o">::</span><span class="no">Unit</span><span class="o">::</span><span class="no">TestCase</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">test_should_boldly_go</span>
+</span><span class='line'>    <span class="n">dilithium</span> <span class="o">=</span> <span class="n">mock</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">dilithium</span><span class="o">.</span><span class="n">expects</span><span class="p">(</span><span class="ss">:nuke</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="ss">:anti_matter</span><span class="p">)</span><span class="o">.</span><span class="n">at_least_once</span>  <span class="c1">#　会在测试用例结束时测试验证</span>
+</span><span class='line'>    <span class="n">enterprise</span> <span class="o">=</span> <span class="no">Enterprise</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">dilithium</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">enterprise</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/20/iosduo-mei-ti/">IOS多媒体</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-20T09:43:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文字用于记录学习IOS上的多媒体使用。</p>
+
+<p>IOS上的多媒体使用有一些不同与OSX的地方，其中最重要的是IOS被设计成是单用户系统，在同一时间内用户的焦点只能有一个，所以你在播放多媒体的时候有可能会被打进来的电话打断，这个时候需要跳到通话界面，通话结束后能在被打断的地方继续播放。</p>
+
+<h2>播放本地音频</h2>
+
+<p>播放本地音频需要如下步骤</p>
+
+<ol>
+<li>Set up an AV Foundation Audio Session (AVAudioSession).</li>
+<li>Set up an AV Foundation Audio Player (AVAudioPlayer).</li>
+<li>Handle any interruptions.</li>
+</ol>
+
+
+<h3>AV Foundation Audio Session</h3>
+
+<p>AV Foundation Audio Session管理你的IOS设备上的音频体验，通过设置不同的属性，你就可以为当前用户提供定制话的体验。比如你的应用需要播放背景音乐，如果用户在进入App的时候已经在播放音乐，比如他正在听Ipod，这时候你就可以选择是用背景音乐覆盖IPod的音乐还是继续播放IPod音乐。</p>
+
+<p>AV Foundation Audio Session是个单例类，意思是只有一个它的实例。当你获得了实例的应用之后，你的首要任务是设置它的代理与类别，代理决定如果相应中断，类别确定多个音频源时的操作。类别有两种主要区别，一种是可以后台播放的，新的音频会替换旧的。但是如果是Ambient类，Ambient会与当前音效混合，Solo Ambient会覆盖当前音效。</p>
+
+<p>下面的代码演示如何播放本地音频</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'><span class="c1">// Set up our sound effect</span>
+</span><span class='line'><span class="n">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">;</span>
+</span><span class='line'><span class="n">AVAudioPlayer</span> <span class="o">*</span><span class="n">soundEffect</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+</span><span class='line'><span class="n">soundEffect</span> <span class="o">=</span> <span class="p">[[</span><span class="n">AVAudioPlayer</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithContentsOfURL:</span><span class="n">soundURL</span> <span class="nl">error:</span><span class="o">&amp;</span><span class="n">error</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">soundEffect</span> <span class="nl">setDelegate:</span><span class="n">self</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">soundEffect</span> <span class="n">prepareToPlay</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// If we are ambient solo, set up background music</span>
+</span><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">category</span> <span class="o">=</span> <span class="p">[[</span><span class="n">AVAudioSession</span> <span class="n">sharedInstance</span><span class="p">]</span> <span class="n">category</span><span class="p">];</span>
+</span><span class='line'><span class="k">if</span><span class="p">([</span><span class="n">category</span> <span class="nl">isEqualToString:</span><span class="n">AVAudioSessionCategorySoloAmbient</span><span class="p">]){</span>
+</span><span class='line'><span class="n">AVAudioPlayer</span> <span class="o">*</span><span class="n">bgMusic</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+</span><span class='line'><span class="n">bgMusic</span> <span class="o">=</span> <span class="p">[[</span><span class="n">AVAudioPlayer</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithContentsOfURL:</span><span class="n">musicURL</span><span class="err">　</span><span class="nl">error:</span><span class="o">&amp;</span><span class="n">error</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">bgMusic</span> <span class="nl">setDelegate:</span><span class="n">self</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">bgMusic</span> <span class="n">prepareToPlay</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">bgMusic</span> <span class="n">play</span><span class="p">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/19/coreimage/">coreImage</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-19T09:43:00+08:00" pubdate data-updated="true">Apr 19<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文字用于记录学习CoreImage</p>
+
+<h2>背景介绍</h2>
+
+<p>CoreImage是苹果的图像处理包，在OSX上已经存在一些年头了，从IOS５开始，苹果把它移到了iPhone上。CoreImage是Object-c框架，它包含了对基于像素的图片的处理和分析函数，包含各种滤镜，头像探测等。</p>
+
+<h2>使用CoreImage</h2>
+
+<p>使用CoreImage的步骤是</p>
+
+<ol>
+<li>创建一个新的 CIImage</li>
+<li>创建新的CIFilter，并提供足够的参数</li>
+<li>生成输出图片，输出图片是一个新的CIImage实例，你可以用它渲染图片或者应用新的滤镜</li>
+<li>渲染图片,渲染可以基于CPU或者　GPU</li>
+</ol>
+
+
+<p>IOS上有三种表示图片的方法，分别是UIImage,CIImage和CGImageRef，从前缀可以看出他们的从属框架，他们底层使用的数据是一样的，但是使用了不同的封装以提供对象属性。下面的代码演示了如果创建一个CIImage，注意它是从CGImageRef创建的</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'><span class="n">UIImage</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">imageView</span> <span class="n">image</span><span class="p">];</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">cgImage</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="n">CGImage</span><span class="p">;</span>
+</span><span class='line'><span class="n">CIImage</span> <span class="o">*</span><span class="n">coreImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">cgImage</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>CIImage和其他图片方法不一样的是它不是最终的产品，它像一个蓝图，你可以使用多个滤镜（滤镜链）来处理它，直到处理结束后在生成最终的结果。</p>
+
+<h3>滤镜</h3>
+
+<p>滤镜用于修改图片的独立像素。苹果的图片滤镜会更新比较快，作者写书的时候有４８中，你可以用一下代码获得所有可用的滤镜和他们的属性</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'> <span class="c1">// Create an array containing all available filter names</span>
+</span><span class='line'> <span class="n">NSArray</span> <span class="o">*</span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIFilter</span>
+</span><span class='line'><span class="nl">filterNamesInCategory:</span><span class="n">kCICategoryBuiltIn</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// Iterate through each filter name</span>
+</span><span class='line'> <span class="c1">// and output that filter’s attributes to the console</span>
+</span><span class='line'> <span class="k">for</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="n">filter</span> <span class="k">in</span> <span class="n">filters</span><span class="p">){</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// Create a new filter with the filter name</span>
+</span><span class='line'>   <span class="n">CIFilter</span> <span class="o">*</span><span class="n">myFilter</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIFilter</span> <span class="nl">filterWithName:</span><span class="n">filter</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// Output the filter name and attributes to the console</span>
+</span><span class='line'>   <span class="n">NSLog</span><span class="p">(</span><span class="err">@”</span><span class="o">%</span><span class="err">@”</span><span class="p">,</span><span class="n">filter</span><span class="p">);</span>
+</span><span class='line'>   <span class="n">NSLog</span><span class="p">(</span><span class="err">@”</span><span class="o">%</span><span class="err">@”</span><span class="p">,[</span><span class="n">myFilter</span> <span class="n">attributes</span><span class="p">]);</span>
+</span><span class='line'> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>每个滤镜都存在与一个或多个分类里,下面的代码演示如何创建一个滤镜</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> 
+</span><span class='line'><span class="c1">// Create a new filter with the name CISepiaTone</span>
+</span><span class='line'><span class="n">CIFilter</span> <span class="o">*</span><span class="n">sepia</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIFilter</span> <span class="nl">filterWithName:</span><span class="err">@”</span><span class="n">CISepiaTone</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set the input image of the sepia tone filter</span>
+</span><span class='line'><span class="p">[</span><span class="n">sepia</span> <span class="nl">setValue:</span><span class="n">myCoreImage</span> <span class="nl">forKey:</span><span class="err">@”</span><span class="n">inputImage</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set the inputIntensity of the sepia tone filter</span>
+</span><span class='line'><span class="n">NSNumber</span> <span class="o">*</span><span class="n">intensity</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithFloat:</span><span class="mf">.5</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">sepia</span> <span class="nl">setValue:</span><span class="n">intensity</span> <span class="nl">forKey:</span><span class="err">@”</span><span class="n">inputIntensity</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Generate a new CIImage from the output image</span>
+</span><span class='line'><span class="c1">// of the sepia tone filter</span>
+</span><span class='line'><span class="n">CIImage</span> <span class="o">*</span><span class="n">outputImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">sepia</span> <span class="n">outputImage</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Core Image Context</h3>
+
+<p>Core Image context用于使用各种滤镜后渲染一个CIImage，当新建一个图片上下文的时候，它会基于CPU或者GPU初始化，当用CPU初始化的时候，使用它就与使用你的程序run loop里的其他对象没什么区别，当使用GCD的时候，它会用openGL２.０来渲染图片。使用GPU渲染路径的好处是你当前的程序RunLopp丝毫不受影响。</p>
+
+<p>CPU渲染了解和GPU渲染路径各有个的优缺点，使用CPU渲染滤镜的一个好处是你可以确保图片可以渲染完成，因为GPU渲染路径是不能转入后台运行的，GPU路径的话性能好。</p>
+
+<h4>Creating a new CIConteXt</h4>
+
+<p>从上面的讨论我们已经知道，有两种方法可以初始话一个图片上下文</p>
+
+<ul>
+<li>contextWithOptions: //　CPU渲染路径</li>
+<li>contextWithEAGLContext:　// GPU渲染路径</li>
+</ul>
+
+
+<p>需要注意的是当使用contextWithEAGLContext的时候，你必须提前创建好EAGLContext，EAGLContext是用于OpenGL绘画的，如果你使用的应用模版是“OpenGL Game”的话，Xcode已经为你创建好了，如果没有你就必须自己创建。</p>
+
+<p>下面的代码演示了如何创建一个CPU渲染路径,注意它使用了SoftwareRenderer，这不是必须的</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> <span class="n">NSDictionary</span> <span class="o">*</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObject:</span><span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithBool:</span><span class="n">YES</span><span class="p">]</span> <span class="nl">forKey:</span><span class="n">kCIContextUseSoftwareRenderer</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">CIContext</span> <span class="o">*</span><span class="n">newContext</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIContext</span> <span class="nl">contextWithOptions:</span><span class="n">options</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">self</span> <span class="nl">setImageContext:</span><span class="n">newContext</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>还有一点需要注意的是你无需为每个滤镜创建一个图形上下文，相反，你已经对始终使用一个，上面的例子就是把图片上下文设为实例变量来用</p>
+
+<h3>Rendering CIImages</h3>
+
+<p>一旦图片上下文创建以后，渲染图片就变的轻松多了。如果你是使用CPU渲染路径，你就可以把CIImage渲染成CGImageRef，以下的代码演示如果渲染图片</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// Render CIImage through CIContext to CGImageRef</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">cgImg</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">imageContext</span> <span class="nl">createCGImage:</span><span class="n">coreImage</span>
+</span><span class='line'><span class="nl">fromRect:</span><span class="p">[</span><span class="n">coreImage</span> <span class="n">extent</span><span class="p">]];</span>
+</span><span class='line'><span class="c1">// Set the UIImage of a UIImageView as an image created with</span>
+</span><span class='line'><span class="c1">// the newly created CGImageRef</span>
+</span><span class='line'><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">imageView</span> <span class="nl">setImage:</span><span class="p">[</span><span class="n">UIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">cgImg</span><span class="p">]];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的参数属性表示你想要渲染的图片矩形大小，extent方法表示原图片大小。</p>
+
+<h2>Analyzing Images</h2>
+
+<p>CoreImage为开发者提供了图片滤镜和面部识别，面部识别，是一个CIDetector类的操作，下面的代码演示和如何做面部识别</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'> <span class="c1">// Create an array of optimized filters</span>
+</span><span class='line'> <span class="n">NSArray</span> <span class="o">*</span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span><span class="n">coreImage</span> <span class="n">autoAdjustmentFilters</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// Iterate through all the filters and apply them to our image</span>
+</span><span class='line'> <span class="k">for</span><span class="p">(</span><span class="n">CIFilter</span> <span class="o">*</span><span class="n">filter</span> <span class="k">in</span> <span class="n">filters</span><span class="p">){</span>
+</span><span class='line'> <span class="p">[</span><span class="n">filter</span> <span class="nl">setValue:</span><span class="n">coreImage</span> <span class="nl">forKey:</span><span class="n">kCIInputImageKey</span><span class="p">];</span>
+</span><span class='line'> <span class="n">coreImage</span> <span class="o">=</span> <span class="n">filter</span><span class="p">.</span><span class="n">outputImage</span><span class="p">;</span>
+</span><span class='line'> <span class="p">}</span>
+</span><span class='line'> <span class="c1">// Set up desired accuracy options dictionary</span>
+</span><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDictionary</span> <span class="nl">dictionaryWithObject:</span><span class="n">CIDetectorAccuracyHigh</span>
+</span><span class='line'>
+</span><span class='line'><span class="nl">forKey:</span><span class="n">CIDetectorAccuracy</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create new CIDetector</span>
+</span><span class='line'><span class="n">CIDetector</span> <span class="o">*</span><span class="n">faceDetector</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIDetector</span>
+</span><span class='line'>                            <span class="nl">detectorOfType:</span><span class="n">CIDetectorTypeFace</span>
+</span><span class='line'>                            <span class="nl">context:</span><span class="n">self</span><span class="p">.</span><span class="n">imageContext</span>
+</span><span class='line'>                            <span class="nl">options:</span><span class="n">options</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSArray</span> <span class="o">*</span><span class="n">faces</span> <span class="o">=</span> <span class="p">[</span><span class="n">faceDetector</span> <span class="nl">featuresInImage:</span><span class="n">coreImage</span>
+</span><span class='line'>                                       <span class="nl">options:</span><span class="n">options</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码先调用了CoreImage的autoAdjustmentFilters并应用，autoAdjustmentFilters包括了颜色调整，消除红眼等操作。然后对图片做面部别。CIDetector的参数制定了CIDetectorAccuracyHigh制定了高精度，注意高精度需要高资源，所以你需要根据你自己的需求调整。还有需要注意的是你需要制定图片的方位，默认CIDetector眼睛在嘴巴上方，所以你必须注意调整。</p>
+
+<h3>Don’t BlOCk the maIn thread!</h3>
+
+<p>任何时候你都应该把图片操作放到后台线程运行，不能阻断主线程。下面的代码演示了如何使用做</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">dispatch_async</span><span class="p">(</span> <span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="n">DISPATCH_QUEUE_PRIORITY_BACKGROUND</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">^</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create CIImage from CGImageRef of our UIImageView’s image</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">cgImg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">imageView</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="n">CGImage</span><span class="p">;</span>
+</span><span class='line'><span class="n">CIImage</span> <span class="o">*</span><span class="n">coreImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">CIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">cgImg</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Iterate through all of our filters and apply</span>
+</span><span class='line'><span class="c1">// them to the CIImage</span>
+</span><span class='line'><span class="k">for</span><span class="p">(</span><span class="n">CIFilter</span> <span class="o">*</span><span class="n">filter</span> <span class="k">in</span> <span class="n">filters</span><span class="p">){</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">filter</span> <span class="nl">setValue:</span><span class="n">coreImage</span> <span class="nl">forKey:</span><span class="n">kCIInputImageKey</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">coreImage</span> <span class="o">=</span> <span class="n">filter</span><span class="p">.</span><span class="n">outputImage</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create a new CGImageRef by rendering through CIContext</span>
+</span><span class='line'><span class="c1">// This won’t slow down main thread since we’re in a</span>
+</span><span class='line'><span class="c1">// background dispatch queue</span>
+</span><span class='line'><span class="n">CGImageRef</span> <span class="n">newImg</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">imageContext</span> <span class="nl">createCGImage:</span><span class="n">coreImage</span>
+</span><span class='line'><span class="nl">fromRect:</span><span class="p">[</span><span class="n">coreImage</span> <span class="n">extent</span><span class="p">]];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Dispatch a new process to the main queue</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span><span class='line'>  <span class="c1">// Update our image view on the main thread</span>
+</span><span class='line'>  <span class="c1">// You can also perform any other UI updates needed</span>
+</span><span class='line'>  <span class="c1">// here such as hiding activity spinners </span>
+</span><span class='line'>  <span class="n">self</span><span class="p">.</span><span class="n">imageView</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIImage</span> <span class="nl">imageWithCGImage:</span><span class="n">newImg</span><span class="p">];</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1545,45 +2178,9 @@ Markdown会把代码块里的代码直接格式化，见如下
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/02/06/ce-shi-wen-zi/">测试文字</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-02-06T14:22:00+08:00" pubdate data-updated="true">Feb 6<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>测试</h3>
-
-<p>这是测试文字测试</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/3/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1598,23 +2195,23 @@ Markdown会把代码块里的代码直接格式化，见如下
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2012/08/23/sicplian-xi-1/">sicp练习1</a>
+        <a href="/blog/2012/08/27/sicplian-xi-3/">sicp练习3</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/26/da-jian-%5B%3F%5D-ge-liang-hao-de-sicp-editor/">搭建一个良好的SICP Editor</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/24/sicplian-xi-2/">sicp练习2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/23/sicplian-xi-1/">Sicplian Xi 1</a>
       </li>
     
       <li class="post">
         <a href="/blog/2012/08/22/ruby-learing-one/">ruby learing one</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/06/18/tilepages-for-uiscrollview/">tilepages for uiscrollview</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/06/15/arc-for-cf/">arc for cf</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/06/06/coretext-part-2-markparser-and-images/">coretext part 2: markparser and images</a>
       </li>
     
   </ul>

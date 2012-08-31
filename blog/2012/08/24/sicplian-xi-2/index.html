@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>sicp练习2 - Keep faith, Stay strong</title>
+  <meta name="author" content="KongLingLiang">
+
+  
+  <meta name="description" content="练习1.14 图就不画了
+步长是5n, 练习1.15 skip for now 练习1.16 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+(define (fast-expt x n) (fast-expt-iter x n 1)) (define (square x) (* x &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://wear.github.com/blog/2012/08/24/sicplian-xi-2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Keep faith, Stay strong" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Keep faith, Stay strong</a></h1>
+  
+    <h2>关于技术及个人笔记.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:wear.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Sicp练习2</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-24T09:38:00+08:00" pubdate data-updated="true">Aug 24<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>练习1.14</h3>
+
+<p>图就不画了
+步长是5<sup>n,</sup></p>
+
+<h3>练习1.15</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.16</h3>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">fast</span><span class="o">-</span><span class="n">expt</span> <span class="n">x</span> <span class="n">n</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">fast</span><span class="o">-</span><span class="n">expt</span><span class="o">-</span><span class="n">iter</span> <span class="n">x</span> <span class="n">n</span> <span class="mi">1</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">square</span> <span class="n">x</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span> <span class="n">x</span> <span class="n">x</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">fast</span><span class="o">-</span><span class="n">expt</span><span class="o">-</span><span class="n">iter</span> <span class="n">x</span> <span class="n">n</span> <span class="n">a</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">cond</span> <span class="p">((</span><span class="o">=</span> <span class="n">n</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span> <span class="n">a</span> <span class="n">x</span><span class="p">))</span>
+</span><span class='line'>        <span class="p">((</span><span class="n">even?</span> <span class="n">n</span><span class="p">)</span> <span class="p">(</span><span class="n">fast</span><span class="o">-</span><span class="n">expt</span><span class="o">-</span><span class="n">iter</span> <span class="p">(</span><span class="n">square</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>                                   <span class="p">(</span><span class="sr">/ n 2)</span>
+</span><span class='line'><span class="sr">                                   a))</span>
+</span><span class='line'><span class="sr">        (else (fast-expt-iter x </span>
+</span><span class='line'><span class="sr">                              (- n 1)</span>
+</span><span class='line'><span class="sr">                              (* a x)))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(fast-expt 2 4)</p>
+
+<h3>练习1.17</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.18</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.19</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.20</h3>
+
+<p>欧几里得算法</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">define</span> <span class="p">(</span><span class="n">gcd</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">b</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">b</span>
+</span><span class='line'>  <span class="n">gcd</span><span class="p">(</span><span class="n">b</span> <span class="p">(</span><span class="n">remainder</span> <span class="n">a</span> <span class="n">b</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中实际的remainder运算应该是取余的一个过程</p>
+
+<p>采用正则序，计算(gcd 206 40)</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="p">(</span><span class="n">gcd</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">))</span>
+</span><span class='line'>  <span class="c1"># 判断(remainder 206 40),这里是6，是否等于0，产生一次remainder运算,继续展开</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">gcd</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)))</span>
+</span><span class='line'>  <span class="c1"># 判断(remainder 40 (remainder 206 40))，这里是4，是否等于0,产生2次remainder运算，继续展开</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">gcd</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">))</span> <span class="p">(</span><span class="n">remainder</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">))))</span>
+</span><span class='line'>  <span class="c1"># 判断 (remainder (remainder 206 40) (remainder 40 (remainder 206 40)))，这里是2，是否等于0，产生4次remainder,继续展开</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">gcd</span> <span class="p">(</span><span class="n">remainder</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)))</span> <span class="p">(</span><span class="n">remainder</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">))</span> <span class="p">(</span><span class="n">remainder</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">40</span> <span class="p">(</span><span class="n">remainder</span> <span class="mi">206</span> <span class="mi">40</span><span class="p">)))))</span>
+</span><span class='line'>  <span class="c1"># 判断(remainder (remainder 40 (remainder 206 40)) (remainder (remainder 206 40) (remainder 40 (remainder 206 40))))),这里是0，是否等于0，产生7次remainder运算,已经等于0，直接计算(remainder (remainder 206 40) (remainder 40 (remainder 206 40))),产生4此remainder运算，所以共18次运算</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>采用应用序的产生4次remainder运算</p>
+
+<h3>练习1.21</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.22</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.23</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.24</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.25</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.26</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.27</h3>
+
+<p>skip for now</p>
+
+<h3>练习1.28</h3>
+
+<p>skip for now</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">KongLingLiang</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-24T09:38:00+08:00" pubdate data-updated="true">Aug 24<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/sicp/'>sicp</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/08/23/sicplian-xi-1/" title="Previous Post: Sicplian Xi 1">&laquo; Sicplian Xi 1</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/08/26/da-jian-%5B%3F%5D-ge-liang-hao-de-sicp-editor/" title="next Post: 搭建一个良好的SICP Editor">搭建一个良好的SICP Editor &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/08/27/sicplian-xi-3/">sicp练习3</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/26/da-jian-%5B%3F%5D-ge-liang-hao-de-sicp-editor/">搭建一个良好的SICP Editor</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/24/sicplian-xi-2/">sicp练习2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/23/sicplian-xi-1/">Sicplian Xi 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/22/ruby-learing-one/">ruby learing one</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - KongLingLiang -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
